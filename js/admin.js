@@ -2,6 +2,8 @@
   const state = {
     pendingImport: null,
     filter: "all",
+    orders: [],
+    localAuth: false,
   };
 
   const loginPanel = document.querySelector("#login-panel");
@@ -9,6 +11,7 @@
   const loginFeedback = document.querySelector("#login-feedback");
   const workspace = document.querySelector("#admin-workspace");
   const logoutButton = document.querySelector("#logout-button");
+  const refreshOrdersButton = document.querySelector("#refresh-orders");
   const importPanel = document.querySelector("#import-panel");
   const importSummary = document.querySelector("#import-summary");
   const acceptImport = document.querySelector("#accept-import");
@@ -19,10 +22,10 @@
   const adminEmpty = document.querySelector("#admin-empty");
   const toolbar = document.querySelector(".admin-toolbar");
 
-  function init() {
+  async function init() {
     bindEvents();
     readImportFromUrl();
-    renderAuth();
+    await renderAuth();
     refreshIcons();
   }
 
@@ -33,33 +36,61 @@
   }
 
   function bindEvents() {
-    loginForm.addEventListener("submit", (event) => {
+    loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(loginForm);
-      const username = String(formData.get("username") || "");
+      const username = String(formData.get("username") || "").trim();
       const password = String(formData.get("password") || "");
+
+      loginFeedback.textContent = "";
+
+      if (window.PizzaManDb && PizzaManDb.isConfigured) {
+        try {
+          await PizzaManDb.signIn(username, password);
+          sessionStorage.removeItem(PizzaMan.config.sessionKey);
+          state.localAuth = false;
+          await renderAuth();
+          return;
+        } catch (error) {
+          loginFeedback.textContent = "Connexion Supabase impossible. Vérifie l'utilisateur Auth ou utilise l'accès local.";
+        }
+      }
 
       if (username === PizzaMan.config.adminUsername && password === PizzaMan.config.adminPassword) {
         sessionStorage.setItem(PizzaMan.config.sessionKey, "1");
+        state.localAuth = true;
         loginFeedback.textContent = "";
-        renderAuth();
+        await renderAuth();
         return;
       }
 
-      loginFeedback.textContent = "Identifiant ou mot de passe incorrect.";
+      if (!loginFeedback.textContent) {
+        loginFeedback.textContent = "Identifiant ou mot de passe incorrect.";
+      }
     });
 
-    logoutButton.addEventListener("click", () => {
+    logoutButton.addEventListener("click", async () => {
+      if (window.PizzaManDb && PizzaManDb.isConfigured) {
+        try {
+          await PizzaManDb.signOut();
+        } catch (error) {
+          setAdminFeedback("Déconnexion Supabase impossible.");
+        }
+      }
+
       sessionStorage.removeItem(PizzaMan.config.sessionKey);
-      renderAuth();
+      state.localAuth = false;
+      await renderAuth();
     });
 
-    acceptImport.addEventListener("click", () => {
+    refreshOrdersButton.addEventListener("click", renderOrders);
+
+    acceptImport.addEventListener("click", async () => {
       if (!state.pendingImport) return;
-      addOrder(state.pendingImport);
+      await addOrder(state.pendingImport);
       state.pendingImport = null;
       renderImportPanel();
-      renderOrders();
+      await renderOrders();
     });
 
     manualImportButton.addEventListener("click", () => {
@@ -81,7 +112,7 @@
       toolbar.querySelectorAll("button[data-filter]").forEach((filterButton) => {
         filterButton.classList.toggle("active", filterButton === button);
       });
-      renderOrders();
+      renderOrdersList();
     });
 
     ordersList.addEventListener("click", async (event) => {
@@ -100,33 +131,40 @@
       }
 
       if (deleteButton) {
-        const orders = PizzaMan.loadOrders().filter((order) => order.id !== deleteButton.dataset.deleteOrder);
-        PizzaMan.saveOrders(orders);
-        renderOrders();
+        await deleteOrder(deleteButton.dataset.deleteOrder);
+        await renderOrders();
         setAdminFeedback("Commande supprimée.");
       }
     });
 
-    ordersList.addEventListener("change", (event) => {
+    ordersList.addEventListener("change", async (event) => {
       const select = event.target.closest("select[data-status-order]");
       if (!select) return;
-      const orders = PizzaMan.loadOrders().map((order) => {
-        if (order.id !== select.dataset.statusOrder) return order;
-        return { ...order, status: select.value };
-      });
-      PizzaMan.saveOrders(orders);
-      renderOrders();
+      await updateOrderStatus(select.dataset.statusOrder, select.value);
+      await renderOrders();
     });
   }
 
-  function renderAuth() {
-    const authenticated = sessionStorage.getItem(PizzaMan.config.sessionKey) === "1";
+  async function renderAuth() {
+    const localAuthenticated = sessionStorage.getItem(PizzaMan.config.sessionKey) === "1";
+    let supabaseAuthenticated = false;
+
+    if (window.PizzaManDb && PizzaManDb.isConfigured) {
+      try {
+        supabaseAuthenticated = Boolean(await PizzaManDb.getSession());
+      } catch (error) {
+        supabaseAuthenticated = false;
+      }
+    }
+
+    state.localAuth = localAuthenticated && !supabaseAuthenticated;
+    const authenticated = localAuthenticated || supabaseAuthenticated;
     loginPanel.hidden = authenticated;
     workspace.hidden = !authenticated;
 
     if (authenticated) {
       renderImportPanel();
-      renderOrders();
+      await renderOrders();
     }
   }
 
@@ -161,7 +199,7 @@
 
   function normalizeOrder(order) {
     return {
-      id: order.id || `PM-${Date.now()}`,
+      id: order.id || PizzaMan.createOrderId(),
       createdAt: order.createdAt || new Date().toISOString(),
       status: order.status || "À faire",
       customer: order.customer || {},
@@ -176,27 +214,73 @@
     const customer = state.pendingImport.customer || {};
     importSummary.textContent = `${state.pendingImport.id} - ${customer.name || "Client non renseigné"} - ${
       state.pendingImport.items.length
-    } pizza(s) - ${PizzaMan.formatMoney(PizzaMan.orderTotal(state.pendingImport))}`;
+    } article(s) - ${PizzaMan.formatMoney(PizzaMan.orderTotal(state.pendingImport))}`;
     refreshIcons();
   }
 
-  function addOrder(order) {
-    const orders = PizzaMan.loadOrders();
-    if (orders.some((existingOrder) => existingOrder.id === order.id)) {
-      setAdminFeedback("Cette commande est déjà dans la liste.");
-      return;
+  async function addOrder(order) {
+    try {
+      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
+        await PizzaManDb.upsertOrder(order, { source: "pizzeria" });
+      } else {
+        const orders = PizzaMan.loadOrders();
+        const nextOrders = [order, ...orders.filter((existingOrder) => existingOrder.id !== order.id)];
+        PizzaMan.saveOrders(nextOrders);
+      }
+      setAdminFeedback("Commande ajoutée à la liste.");
+    } catch (error) {
+      setAdminFeedback("Ajout impossible dans Supabase. Vérifie la migration et la connexion Auth.");
     }
-
-    PizzaMan.saveOrders([order, ...orders]);
-    setAdminFeedback("Commande ajoutée à la liste.");
   }
 
   function getOrder(id) {
-    return PizzaMan.loadOrders().find((order) => order.id === id);
+    return state.orders.find((order) => order.id === id);
   }
 
-  function renderOrders() {
-    const orders = PizzaMan.loadOrders().filter((order) => state.filter === "all" || order.status === state.filter);
+  async function loadOrders() {
+    try {
+      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
+        return await PizzaManDb.listOrders();
+      }
+    } catch (error) {
+      setAdminFeedback("Lecture Supabase impossible. Affichage des commandes locales.");
+    }
+
+    return PizzaMan.loadOrders();
+  }
+
+  async function updateOrderStatus(id, status) {
+    try {
+      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
+        await PizzaManDb.updateOrderStatus(id, status);
+      } else {
+        const orders = PizzaMan.loadOrders().map((order) => (order.id === id ? { ...order, status } : order));
+        PizzaMan.saveOrders(orders);
+      }
+    } catch (error) {
+      setAdminFeedback("Modification du statut impossible.");
+    }
+  }
+
+  async function deleteOrder(id) {
+    try {
+      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
+        await PizzaManDb.deleteOrder(id);
+      } else {
+        PizzaMan.saveOrders(PizzaMan.loadOrders().filter((order) => order.id !== id));
+      }
+    } catch (error) {
+      setAdminFeedback("Suppression impossible.");
+    }
+  }
+
+  async function renderOrders() {
+    state.orders = await loadOrders();
+    renderOrdersList();
+  }
+
+  function renderOrdersList() {
+    const orders = state.orders.filter((order) => state.filter === "all" || order.status === state.filter);
     adminEmpty.hidden = orders.length > 0;
     ordersList.innerHTML = orders.map(renderOrderCard).join("");
     refreshIcons();
@@ -223,6 +307,11 @@
     const customerPhone = PizzaMan.escapeHtml(customer.phone || "Téléphone non renseigné");
     const customerMode = PizzaMan.escapeHtml(customer.mode || "À emporter");
     const customerAddress = PizzaMan.escapeHtml(customer.address || "");
+    const delivery = PizzaMan.deliveryCharge(order);
+    const deliveryWarning =
+      customer.mode === "Livraison" && PizzaMan.pizzaCount(order) < PizzaMan.business.deliveryMinimum
+        ? `<p>Attention: livraison à partir de ${PizzaMan.business.deliveryMinimum} pizzas.</p>`
+        : "";
 
     return `
       <article class="order-card ${statusClass}">
@@ -236,6 +325,8 @@
           <p>${customerName} - ${customerPhone}</p>
           <p>${customerMode}${customerAddress ? ` - ${customerAddress}` : ""}</p>
           <ul>${items}</ul>
+          ${delivery ? `<p>Frais livraison: ${PizzaMan.formatMoney(delivery)}</p>` : ""}
+          ${deliveryWarning}
         </div>
         <div class="order-actions">
           <select data-status-order="${orderId}" aria-label="Statut de ${orderId}">

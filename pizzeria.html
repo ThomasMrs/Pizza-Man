@@ -3,19 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pizza'Man - Pizzeria</title>
+    <title>Pizza'Man St Jean - Pizzeria</title>
     <meta
       name="description"
       content="Interface pizzeria Pizza'Man pour ajouter, suivre et préparer les commandes reçues."
     />
-    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="icon" href="assets/favicon.png" type="image/png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="admin-body">
     <header class="site-header admin-header">
       <a class="brand" href="index.html" aria-label="Pizza'Man accueil">
-        <img src="assets/logo.svg" alt="" />
-        <span>Pizza'Man</span>
+        <img src="assets/pizzaman-logo.png" alt="" />
+        <span>Pizza'Man St Jean</span>
       </a>
       <nav class="top-nav" aria-label="Navigation principale">
         <a href="index.html">Client</a>
@@ -35,7 +35,7 @@
         </div>
         <form id="login-form" class="login-form">
           <label>
-            Identifiant
+            Email ou identifiant
             <input name="username" autocomplete="username" required />
           </label>
           <label>
@@ -56,10 +56,16 @@
             <p class="kicker">Production</p>
             <h1>Liste des commandes</h1>
           </div>
-          <button class="secondary-action" id="logout-button" type="button">
-            <i data-lucide="log-out" aria-hidden="true"></i>
-            Déconnexion
-          </button>
+          <div class="admin-actions">
+            <button class="secondary-action" id="refresh-orders" type="button">
+              <i data-lucide="refresh-cw" aria-hidden="true"></i>
+              Actualiser
+            </button>
+            <button class="secondary-action" id="logout-button" type="button">
+              <i data-lucide="log-out" aria-hidden="true"></i>
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         <div class="import-panel" id="import-panel" hidden>
@@ -105,7 +111,9 @@
     </main>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/shared.js"></script>
+    <script src="js/supabase-client.js"></script>
     <script src="js/admin.js"></script>
   </body>
 </html>

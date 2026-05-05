@@ -1,65 +1,21 @@
 (function () {
-  const menu = [
-    {
-      id: "margherita",
-      name: "Margherita",
-      description: "Tomate, mozzarella, basilic frais, huile d'olive.",
-      prices: { small: 8.5, large: 11.5 },
-      image:
-        "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=900&q=80",
-    },
-    {
-      id: "reine",
-      name: "Reine",
-      description: "Tomate, mozzarella, jambon, champignons frais.",
-      prices: { small: 9.5, large: 12.9 },
-      image:
-        "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=80",
-    },
-    {
-      id: "quatre-fromages",
-      name: "4 Fromages",
-      description: "Tomate, mozzarella, chèvre, gorgonzola, parmesan.",
-      prices: { small: 10.5, large: 14.5 },
-      image:
-        "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=900&q=80",
-    },
-    {
-      id: "pepperoni",
-      name: "Pepperoni",
-      description: "Tomate, mozzarella, pepperoni, origan.",
-      prices: { small: 10, large: 13.9 },
-      image:
-        "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=900&q=80",
-    },
-    {
-      id: "vegetarienne",
-      name: "Végétarienne",
-      description: "Tomate, mozzarella, poivrons, champignons, olives, oignons.",
-      prices: { small: 9.9, large: 13.5 },
-      image:
-        "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&q=80",
-    },
-    {
-      id: "pizza-man",
-      name: "Pizza'Man",
-      description: "Crème, mozzarella, poulet, pommes de terre, oignons rouges.",
-      prices: { small: 11.5, large: 15.5 },
-      image:
-        "https://images.unsplash.com/photo-1528137871618-79d2761e3fd5?auto=format&fit=crop&w=900&q=80",
-    },
-  ];
-
-  const extras = [
-    { id: "mozzarella", name: "Mozzarella", price: 1.5 },
-    { id: "chevre", name: "Chèvre", price: 1.5 },
-    { id: "jambon", name: "Jambon", price: 1.8 },
-    { id: "pepperoni", name: "Pepperoni", price: 1.8 },
-    { id: "champignons", name: "Champignons", price: 1.2 },
-    { id: "oeuf", name: "Oeuf", price: 1.2 },
-    { id: "olives", name: "Olives", price: 1 },
-    { id: "roquette", name: "Roquette", price: 1 },
-  ];
+  const business = {
+    name: "Pizza'Man St Jean",
+    shortName: "Pizza'Man",
+    headline: "Pizza'Man St Jean - Cuisson au feu de bois - Depuis 1996",
+    address: "8 Route Nationale 115, 66490 Saint-Jean-Pla-de-Corts",
+    hours: "Ouvert du mardi au samedi de 17h à 21h30",
+    phone: "06-46-57-63-69",
+    smsHref: "sms:+33646576369",
+    whatsappHref: "https://wa.me/33646576369",
+    facebookUrl: "https://www.facebook.com/pizzaman.stjean/?ref=page_internal",
+    googleUrl: "https://share.google/MiNwfMVDMd9wwK8vd",
+    deliveryZones: "Le Boulou, Céret, Maureillas, St Jean",
+    deliveryFee: 4,
+    deliveryMinimum: 2,
+    deliveryNote: "Livraison à partir de 2 pizzas, pas de pizza offerte en livraison.",
+    allergenNote: "Liste des allergènes disponible sur demande.",
+  };
 
   const config = {
     adminUsername: "pizzeria",
@@ -67,13 +23,368 @@
     currency: "EUR",
     orderStorageKey: "pizzaman-orders",
     sessionKey: "pizzaman-admin-session",
+    modificationPrice: 0.5,
+    supplementPrices: {
+      small: 1,
+      large: 1.5,
+      single: 1,
+    },
+  };
+
+  const images = {
+    classic:
+      "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=900&q=80",
+    cheese:
+      "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=900&q=80",
+    fish:
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&q=80",
+    meat:
+      "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=900&q=80",
+    sweet:
+      "https://images.unsplash.com/photo-1571066811602-716837d681de?auto=format&fit=crop&w=900&q=80",
+    special:
+      "https://images.unsplash.com/photo-1528137871618-79d2761e3fd5?auto=format&fit=crop&w=900&q=80",
+    dessert:
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80",
+    drinks:
+      "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
+  };
+
+  const menu = [
+    {
+      id: "margarita",
+      name: "Margarita",
+      category: "Les classiques",
+      description: "Tomate, jambon, emmental, mozzarella, olives. Disponible avec ou sans jambon.",
+      prices: { small: 11.9, large: 13.9 },
+      image: images.classic,
+      type: "pizza",
+    },
+    {
+      id: "regina",
+      name: "Régina",
+      category: "Les classiques",
+      description: "Tomate, jambon, champignons, emmental, olives.",
+      prices: { small: 12.9, large: 14.9 },
+      image: images.classic,
+      type: "pizza",
+    },
+    {
+      id: "complete",
+      name: "Complète",
+      category: "Les classiques",
+      description: "Tomate, jambon, emmental, oeuf, olives.",
+      prices: { small: 11.9, large: 13.9 },
+      image: images.classic,
+      type: "pizza",
+    },
+    {
+      id: "royale",
+      name: "Royale",
+      category: "Les classiques",
+      description: "Crème, champignons, emmental, lardons, chèvre, oeuf, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.classic,
+      type: "pizza",
+    },
+    {
+      id: "roquefort",
+      name: "Roquefort",
+      category: "Le choix du fromager",
+      description: "Tomate, emmental, roquefort, mozzarella, crème, olives.",
+      prices: { small: 13.9, large: 15.9 },
+      image: images.cheese,
+      type: "pizza",
+    },
+    {
+      id: "4-fromages",
+      name: "4 Fromages",
+      category: "Le choix du fromager",
+      description: "Tomate, emmental, mozzarella, chèvre, roquefort, crème, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.cheese,
+      type: "pizza",
+    },
+    {
+      id: "reblochonne",
+      name: "Reblochonne",
+      category: "Le choix du fromager",
+      description: "Crème, emmental, reblochon, lardons, oignons, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.cheese,
+      type: "pizza",
+    },
+    {
+      id: "raclette",
+      name: "Raclette",
+      category: "Le choix du fromager",
+      description: "Crème, jambon, emmental, raclette, lardons, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.cheese,
+      type: "pizza",
+    },
+    {
+      id: "sicilienne",
+      name: "Sicilienne",
+      category: "Le choix du pêcheur",
+      description: "Tomate, emmental, anchois, olives.",
+      prices: { small: 12.9, large: 14.9 },
+      image: images.fish,
+      type: "pizza",
+    },
+    {
+      id: "catalane",
+      name: "Catalane",
+      category: "Le choix du pêcheur",
+      description: "Tomate, emmental, anchois, poivrons, oignons, olives.",
+      prices: { small: 13.9, large: 15.9 },
+      image: images.fish,
+      type: "pizza",
+    },
+    {
+      id: "norvegienne",
+      name: "Norvégienne",
+      category: "Le choix du pêcheur",
+      description: "Tomate, saumon, emmental, mozzarella, crème, olives.",
+      prices: { small: 13.9, large: 17.9 },
+      image: images.fish,
+      type: "pizza",
+    },
+    {
+      id: "chorizo",
+      name: "Chorizo",
+      category: "Le choix du charcutier",
+      description: "Tomate, chorizo, emmental, crème fraîche, olives.",
+      prices: { small: 12.9, large: 14.9 },
+      image: images.meat,
+      type: "pizza",
+    },
+    {
+      id: "super-chorizo",
+      name: "Super Chorizo",
+      category: "Le choix du charcutier",
+      description: "Tomate, chorizo, emmental, chèvre, poivrons, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.meat,
+      type: "pizza",
+    },
+    {
+      id: "super-chef",
+      name: "Super Chef",
+      category: "Le choix du charcutier",
+      description: "Tomate, emmental, merguez, oignons, olives.",
+      prices: { small: 13.9, large: 15.9 },
+      image: images.meat,
+      type: "pizza",
+    },
+    {
+      id: "royal-merguez",
+      name: "Royal Merguez",
+      category: "Le choix du charcutier",
+      description: "Tomate, chorizo, emmental, merguez, oeuf, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.meat,
+      type: "pizza",
+    },
+    {
+      id: "campagnarde",
+      name: "Campagnarde",
+      category: "Le choix du charcutier",
+      description: "Tomate, emmental, lardons, oignons, crème, olives.",
+      prices: { small: 13.9, large: 15.9 },
+      image: images.meat,
+      type: "pizza",
+    },
+    {
+      id: "forestiere",
+      name: "Forestière",
+      category: "Le choix du charcutier",
+      description: "Tomate, champignons, emmental, lardons, crème, ail, olives.",
+      prices: { small: 13.9, large: 15.9 },
+      image: images.meat,
+      type: "pizza",
+    },
+    {
+      id: "popolino",
+      name: "Popoliño",
+      category: "Les sucrées / salées",
+      description: "Tomate, jambon, ananas, emmental, chèvre, miel, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.sweet,
+      type: "pizza",
+    },
+    {
+      id: "hawaienne",
+      name: "Hawaïenne",
+      category: "Les sucrées / salées",
+      description: "Tomate, jambon, ananas, emmental, olives.",
+      prices: { small: 12.9, large: 14.9 },
+      image: images.sweet,
+      type: "pizza",
+    },
+    {
+      id: "chevre-miel",
+      name: "Chèvre Miel",
+      category: "Les sucrées / salées",
+      description: "Crème fraîche, emmental, mozzarella, miel, chèvre, olives.",
+      prices: { small: 12.9, large: 14.9 },
+      image: images.sweet,
+      type: "pizza",
+    },
+    {
+      id: "reblo-miel",
+      name: "Reblo-Miel",
+      category: "Les sucrées / salées",
+      description: "Crème, emmental, reblochon, miel, lardons, oignons, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.sweet,
+      type: "pizza",
+    },
+    {
+      id: "vegetarienne",
+      name: "Végétarienne",
+      category: "Les spéciales",
+      description: "Tomate, champignons, emmental, poivrons, oignons, pincée de sel, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.special,
+      type: "pizza",
+    },
+    {
+      id: "bbq",
+      name: "BBQ",
+      category: "Les spéciales",
+      description: "Tomate, emmental, sauce BBQ, viande hachée, poivrons, oignons, olives.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.special,
+      type: "pizza",
+    },
+    {
+      id: "kebab",
+      name: "Kebab",
+      category: "Les spéciales",
+      description: "Base tomate, emmental, kebab hallal, oignons, crème fraîche, olives.",
+      prices: { small: 13.9, large: 17.9 },
+      image: images.special,
+      type: "pizza",
+    },
+    {
+      id: "super-magret",
+      name: "Super Magret",
+      category: "Les spéciales",
+      description: "Crème, champignons, emmental, magret du sud-ouest, sel, poivre, chèvre, olives.",
+      prices: { small: 14.9, large: 18.9 },
+      image: images.special,
+      type: "pizza",
+    },
+    {
+      id: "choco-banane",
+      name: "Choco-Banane",
+      category: "La pizza dessert",
+      description: "Banane, Nutella, crème fraîche.",
+      prices: { small: 10.9 },
+      image: images.dessert,
+      type: "pizza",
+      allowExtras: false,
+    },
+    {
+      id: "vin-deprade-jorda",
+      name: "Vin Deprade Jorda",
+      category: "Les boissons",
+      description: "Rouge, rosé ou blanc.",
+      prices: { single: 9.9 },
+      image: images.drinks,
+      type: "drink",
+      allowExtras: false,
+      allowModification: false,
+    },
+    {
+      id: "lambrusco",
+      name: "La bouteille de Lambrusco",
+      category: "Les boissons",
+      description: "Bouteille.",
+      prices: { single: 9.9 },
+      image: images.drinks,
+      type: "drink",
+      allowExtras: false,
+      allowModification: false,
+    },
+    {
+      id: "coca-125",
+      name: "Coca-Cola 1,25 l",
+      category: "Les boissons",
+      description: "Grande bouteille.",
+      prices: { single: 3.5 },
+      image: images.drinks,
+      type: "drink",
+      allowExtras: false,
+      allowModification: false,
+    },
+    {
+      id: "canettes",
+      name: "Canettes",
+      category: "Les boissons",
+      description: "Coca-Cola, bière, Ice Tea, etc.",
+      prices: { single: 2.5 },
+      image: images.drinks,
+      type: "drink",
+      allowExtras: false,
+      allowModification: false,
+    },
+    {
+      id: "despe-33",
+      name: "Despé 33 cl",
+      category: "Les boissons",
+      description: "Bouteille 33 cl.",
+      prices: { single: 3.5 },
+      image: images.drinks,
+      type: "drink",
+      allowExtras: false,
+      allowModification: false,
+    },
+  ];
+
+  const extras = [
+    { id: "emmental", name: "Emmental" },
+    { id: "mozzarella", name: "Mozzarella" },
+    { id: "chevre", name: "Chèvre" },
+    { id: "roquefort", name: "Roquefort" },
+    { id: "reblochon", name: "Reblochon" },
+    { id: "raclette", name: "Raclette" },
+    { id: "jambon", name: "Jambon" },
+    { id: "lardons", name: "Lardons" },
+    { id: "chorizo", name: "Chorizo" },
+    { id: "merguez", name: "Merguez" },
+    { id: "kebab", name: "Kebab" },
+    { id: "viande-hachee", name: "Viande hachée" },
+    { id: "saumon", name: "Saumon" },
+    { id: "anchois", name: "Anchois" },
+    { id: "champignons", name: "Champignons" },
+    { id: "poivrons", name: "Poivrons" },
+    { id: "oignons", name: "Oignons" },
+    { id: "olives", name: "Olives" },
+    { id: "oeuf", name: "Oeuf" },
+    { id: "ananas", name: "Ananas" },
+    { id: "miel", name: "Miel" },
+    { id: "creme-fraiche", name: "Crème fraîche" },
+    { id: "sauce-bbq", name: "Sauce BBQ" },
+  ];
+
+  const sizeLabels = {
+    small: "Petite 26cm",
+    large: "Grande 33cm",
+    single: "",
   };
 
   function createOrderId(date = new Date()) {
-    const compactDate = date
-      .toISOString()
-      .replace(/[-:TZ.]/g, "")
-      .slice(0, 14);
+    const pad = (value) => String(value).padStart(2, "0");
+    const compactDate = [
+      date.getFullYear(),
+      pad(date.getMonth() + 1),
+      pad(date.getDate()),
+      pad(date.getHours()),
+      pad(date.getMinutes()),
+      pad(date.getSeconds()),
+    ].join("");
     return `PM-${compactDate}`;
   }
 
@@ -97,51 +408,112 @@
     });
   }
 
+  function getMenuItem(id) {
+    return menu.find((item) => item.id === id);
+  }
+
   function getPizza(id) {
-    return menu.find((pizza) => pizza.id === id);
+    return getMenuItem(id);
   }
 
   function getExtra(id) {
     return extras.find((extra) => extra.id === id);
   }
 
+  function getAvailableSizes(itemOrId) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    if (!item) return [];
+    const order = ["small", "large", "single"];
+    return order.filter((size) => Object.prototype.hasOwnProperty.call(item.prices, size));
+  }
+
+  function getDefaultSize(itemOrId) {
+    return getAvailableSizes(itemOrId)[0] || "single";
+  }
+
+  function sizeLabel(size, itemOrId) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    if (size === "single") return item && item.singleLabel ? item.singleLabel : "";
+    return sizeLabels[size] || size || "";
+  }
+
+  function allowsExtras(itemOrId) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    return Boolean(item && item.type === "pizza" && item.allowExtras !== false);
+  }
+
+  function allowsModification(itemOrId) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    return Boolean(item && item.type === "pizza" && item.allowModification !== false);
+  }
+
+  function supplementPrice(size) {
+    return config.supplementPrices[size] || config.supplementPrices.small;
+  }
+
+  function formatPriceRange(itemOrId) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    if (!item) return "";
+    const sizes = getAvailableSizes(item);
+    if (sizes.length === 1) return formatMoney(item.prices[sizes[0]]);
+    return sizes.map((size) => formatMoney(item.prices[size])).join(" / ");
+  }
+
   function itemUnitPrice(item) {
-    const pizza = getPizza(item.pizzaId);
-    if (!pizza) return 0;
-    const base = pizza.prices[item.size] || pizza.prices.small;
-    const extrasTotal = (item.extras || []).reduce((total, extraId) => {
-      const extra = getExtra(extraId);
-      return total + (extra ? extra.price : 0);
-    }, 0);
-    return base + extrasTotal;
+    const menuItem = getMenuItem(item.pizzaId);
+    if (!menuItem) return 0;
+    const size = item.size && menuItem.prices[item.size] !== undefined ? item.size : getDefaultSize(menuItem);
+    const base = menuItem.prices[size] || 0;
+    const extrasTotal = allowsExtras(menuItem)
+      ? (item.extras || []).reduce((total, extraId) => total + (getExtra(extraId) ? supplementPrice(size) : 0), 0)
+      : 0;
+    const modificationTotal =
+      allowsModification(menuItem) && String(item.modification || "").trim() ? config.modificationPrice : 0;
+    return base + extrasTotal + modificationTotal;
   }
 
   function itemTotal(item) {
     return itemUnitPrice(item) * (item.quantity || 1);
   }
 
-  function orderTotal(order) {
+  function itemsSubtotal(order) {
     return (order.items || []).reduce((total, item) => total + itemTotal(item), 0);
   }
 
-  function sizeLabel(size) {
-    return size === "large" ? "Grande" : "Petite";
+  function pizzaCount(order) {
+    return (order.items || []).reduce((count, item) => {
+      const menuItem = getMenuItem(item.pizzaId);
+      return count + (menuItem && menuItem.type === "pizza" ? item.quantity || 1 : 0);
+    }, 0);
+  }
+
+  function deliveryCharge(order) {
+    return order.customer && order.customer.mode === "Livraison" && (order.items || []).length
+      ? business.deliveryFee
+      : 0;
+  }
+
+  function orderTotal(order) {
+    return itemsSubtotal(order) + deliveryCharge(order);
   }
 
   function itemSummary(item) {
-    const pizza = getPizza(item.pizzaId);
-    if (!pizza) return "Pizza inconnue";
+    const menuItem = getMenuItem(item.pizzaId);
+    if (!menuItem) return "Article inconnu";
 
-    const extraLabels = (item.extras || [])
-      .map((id) => getExtra(id))
-      .filter(Boolean)
-      .map((extra) => extra.name);
+    const label = sizeLabel(item.size, menuItem);
+    const extraLabels = allowsExtras(menuItem)
+      ? (item.extras || [])
+          .map((id) => getExtra(id))
+          .filter(Boolean)
+          .map((extra) => extra.name)
+      : [];
 
     const parts = [
-      `${item.quantity || 1}x ${pizza.name}`,
-      sizeLabel(item.size),
+      `${item.quantity || 1}x ${menuItem.name}`,
+      label,
       extraLabels.length ? `Suppléments: ${extraLabels.join(", ")}` : "",
-      item.modification ? `Modification: ${item.modification}` : "",
+      allowsModification(menuItem) && item.modification ? `Modification: ${item.modification}` : "",
     ].filter(Boolean);
 
     return parts.join(" - ");
@@ -166,6 +538,11 @@
 
   function formatOrderMessage(order) {
     const customer = order.customer || {};
+    const delivery = deliveryCharge(order);
+    const deliveryWarning =
+      customer.mode === "Livraison" && pizzaCount(order) < business.deliveryMinimum
+        ? `Attention: livraison à partir de ${business.deliveryMinimum} pizzas.`
+        : "";
     const lines = [
       `Commande Pizza'Man ${order.id}`,
       "",
@@ -173,9 +550,11 @@
       `Téléphone: ${customer.phone || "Non renseigné"}`,
       `Mode: ${customer.mode || "À emporter"}`,
       customer.address ? `Précision: ${customer.address}` : "",
+      deliveryWarning,
       "",
-      "Pizzas:",
+      "Articles:",
       ...(order.items || []).map((item) => `- ${itemSummary(item)} (${formatMoney(itemTotal(item))})`),
+      delivery ? `Frais livraison: ${formatMoney(delivery)}` : "",
       "",
       `Total: ${formatMoney(orderTotal(order))}`,
     ];
@@ -221,18 +600,29 @@
   }
 
   window.PizzaMan = {
+    business,
     menu,
     extras,
     config,
     createOrderId,
     escapeHtml,
     formatMoney,
+    getMenuItem,
     getPizza,
     getExtra,
+    getAvailableSizes,
+    getDefaultSize,
+    sizeLabel,
+    allowsExtras,
+    allowsModification,
+    supplementPrice,
+    formatPriceRange,
     itemUnitPrice,
     itemTotal,
+    itemsSubtotal,
+    pizzaCount,
+    deliveryCharge,
     orderTotal,
-    sizeLabel,
     itemSummary,
     createOrder,
     formatOrderMessage,
