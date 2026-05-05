@@ -13,6 +13,7 @@
   const emptyCart = document.querySelector("#empty-cart");
   const cartItems = document.querySelector("#cart-items");
   const cartTotal = document.querySelector("#cart-total");
+  const cartCount = document.querySelector("#cart-count");
   const customerForm = document.querySelector("#customer-form");
   const messageOutput = document.querySelector("#message-output");
   const copyMessageButton = document.querySelector("#copy-message");
@@ -303,6 +304,7 @@
       name: String(formData.get("name") || "").trim(),
       phone: String(formData.get("phone") || "").trim(),
       mode: String(formData.get("mode") || "À emporter"),
+      desiredTime: String(formData.get("desiredTime") || "").trim(),
       address: String(formData.get("address") || "").trim(),
     };
   }
@@ -374,8 +376,10 @@
     const encodedMessage = encodeURIComponent(messageOutput.value);
     whatsappLink.href = state.cart.length > 0 ? `${PizzaMan.business.whatsappHref}?text=${encodedMessage}` : "#";
     smsLink.href = state.cart.length > 0 ? `${PizzaMan.business.smsHref}?&body=${encodedMessage}` : "#";
+    const articleCount = PizzaMan.articleCount(order);
+    cartCount.textContent = `${articleCount} article${articleCount > 1 ? "s" : ""}`;
     mobileCartLabel.textContent =
-      state.cart.length > 0 ? `${state.cart.length} article(s) - ${PizzaMan.formatMoney(total)}` : "Voir la commande";
+      articleCount > 0 ? `${articleCount} article(s) - ${PizzaMan.formatMoney(total)}` : "Voir la commande";
 
     refreshIcons();
   }

@@ -487,6 +487,22 @@
     }, 0);
   }
 
+  function articleCount(order) {
+    return (order.items || []).reduce((count, item) => count + (item.quantity || 1), 0);
+  }
+
+  function orderTimeValue(order) {
+    const customer = order.customer || {};
+    return customer.plannedTime || customer.desiredTime || "";
+  }
+
+  function formatTimeLabel(time) {
+    if (!time) return "Heure non définie";
+    const parts = String(time).split(":");
+    if (parts.length < 2) return time;
+    return `${parts[0]}h${parts[1]}`;
+  }
+
   function deliveryCharge(order) {
     return order.customer && order.customer.mode === "Livraison" && (order.items || []).length
       ? business.deliveryFee
@@ -531,6 +547,8 @@
         phone: customer.phone || "",
         mode: customer.mode || "À emporter",
         address: customer.address || "",
+        desiredTime: customer.desiredTime || "",
+        plannedTime: customer.plannedTime || "",
       },
       items: cart.map((item) => ({ ...item })),
     };
@@ -549,6 +567,8 @@
       `Client: ${customer.name || "Non renseigné"}`,
       `Téléphone: ${customer.phone || "Non renseigné"}`,
       `Mode: ${customer.mode || "À emporter"}`,
+      customer.desiredTime ? `Heure souhaitée: ${formatTimeLabel(customer.desiredTime)}` : "",
+      customer.plannedTime ? `Heure prévue pizzeria: ${formatTimeLabel(customer.plannedTime)}` : "",
       customer.address ? `Précision: ${customer.address}` : "",
       deliveryWarning,
       "",
@@ -621,6 +641,9 @@
     itemTotal,
     itemsSubtotal,
     pizzaCount,
+    articleCount,
+    orderTimeValue,
+    formatTimeLabel,
     deliveryCharge,
     orderTotal,
     itemSummary,

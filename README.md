@@ -24,7 +24,7 @@ pizzeria via un lien.
 - `js/client.js` : panier, personnalisation, message et lien de commande.
 - `js/admin.js` : import des liens de commande, statuts et lecture Supabase.
 - `styles.css` : interface mobile et ordinateur.
-- `assets/pizzaman-logo.png` : logo du site.
+- `assets/pizzaman-logo-clean.png` : logo découpé utilisé par le site.
 - `assets/favicon.png` : logo de l'onglet du navigateur.
 - `supabase/migrations/202605060001_create_orders.sql` : table `orders` et règles RLS.
 
@@ -57,6 +57,9 @@ Le site génère ensuite :
 - un lien WhatsApp ;
 - un lien SMS ;
 - un lien pizzeria.
+
+Le client peut renseigner une heure souhaitée. Côté pizzeria, le planning des
+livraisons affiche les commandes à livrer et permet d'ajuster l'heure prévue.
 
 Quand le client copie ou envoie le message, le site tente aussi d'enregistrer la
 commande dans Supabase. Le lien pizzeria ouvre `pizzeria.html` avec la commande

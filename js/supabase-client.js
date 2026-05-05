@@ -103,6 +103,17 @@
     if (error) throw error;
   }
 
+  async function updateOrderCustomer(id, customer) {
+    if (!client) {
+      const orders = PizzaMan.loadOrders().map((order) => (order.id === id ? { ...order, customer } : order));
+      PizzaMan.saveOrders(orders);
+      return;
+    }
+
+    const { error } = await client.from("orders").update({ customer }).eq("id", id);
+    if (error) throw error;
+  }
+
   async function deleteOrder(id) {
     if (!client) {
       PizzaMan.saveOrders(PizzaMan.loadOrders().filter((order) => order.id !== id));
@@ -123,6 +134,7 @@
     upsertOrder,
     listOrders,
     updateOrderStatus,
+    updateOrderCustomer,
     deleteOrder,
   };
 })();

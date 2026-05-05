@@ -14,7 +14,7 @@
   <body>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Pizza'Man accueil">
-        <img src="assets/pizzaman-logo.png" alt="" />
+        <img src="assets/pizzaman-logo-clean.png" alt="" />
         <span>Pizza'Man St Jean</span>
       </a>
       <nav class="top-nav" aria-label="Navigation principale">
@@ -75,6 +75,7 @@
           <div class="section-heading compact">
             <p class="kicker">Panier</p>
             <h2 id="cart-title">Commande</h2>
+            <p class="cart-count-badge" id="cart-count">0 article</p>
           </div>
 
           <div class="empty-cart" id="empty-cart">
@@ -109,6 +110,10 @@
                 <option value="À emporter">À emporter</option>
                 <option value="Livraison">Livraison (+4 EUR)</option>
               </select>
+            </label>
+            <label>
+              Heure souhaitée
+              <input name="desiredTime" type="time" />
             </label>
             <label>
               Adresse ou précision

@@ -14,7 +14,7 @@
   <body class="admin-body">
     <header class="site-header admin-header">
       <a class="brand" href="index.html" aria-label="Pizza'Man accueil">
-        <img src="assets/pizzaman-logo.png" alt="" />
+        <img src="assets/pizzaman-logo-clean.png" alt="" />
         <span>Pizza'Man St Jean</span>
       </a>
       <nav class="top-nav" aria-label="Navigation principale">
@@ -91,6 +91,18 @@
           </div>
           <p class="form-note" id="admin-feedback" role="status" aria-live="polite"></p>
         </div>
+
+        <section class="schedule-panel" aria-labelledby="schedule-title">
+          <div class="section-heading compact">
+            <p class="kicker">Planning</p>
+            <h2 id="schedule-title">Planning livraisons</h2>
+          </div>
+          <div class="empty-cart schedule-empty" id="schedule-empty">
+            <i data-lucide="calendar-clock" aria-hidden="true"></i>
+            <p>Aucune livraison à planifier.</p>
+          </div>
+          <div class="schedule-list" id="schedule-list"></div>
+        </section>
 
         <div class="admin-toolbar" aria-label="Filtres commandes">
           <button class="filter-button active" data-filter="all" type="button">Toutes</button>

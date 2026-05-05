@@ -20,6 +20,8 @@
   const adminFeedback = document.querySelector("#admin-feedback");
   const ordersList = document.querySelector("#orders-list");
   const adminEmpty = document.querySelector("#admin-empty");
+  const scheduleList = document.querySelector("#schedule-list");
+  const scheduleEmpty = document.querySelector("#schedule-empty");
   const toolbar = document.querySelector(".admin-toolbar");
 
   async function init() {
@@ -139,9 +141,22 @@
 
     ordersList.addEventListener("change", async (event) => {
       const select = event.target.closest("select[data-status-order]");
-      if (!select) return;
-      await updateOrderStatus(select.dataset.statusOrder, select.value);
-      await renderOrders();
+      const scheduleInput = event.target.closest("input[data-schedule-order]");
+
+      if (select) {
+        await updateOrderStatus(select.dataset.statusOrder, select.value);
+        await renderOrders();
+      }
+
+      if (scheduleInput) {
+        await updateOrderSchedule(scheduleInput.dataset.scheduleOrder, scheduleInput.value);
+      }
+    });
+
+    scheduleList.addEventListener("change", async (event) => {
+      const scheduleInput = event.target.closest("input[data-schedule-order]");
+      if (!scheduleInput) return;
+      await updateOrderSchedule(scheduleInput.dataset.scheduleOrder, scheduleInput.value);
     });
   }
 
@@ -212,9 +227,9 @@
     if (!state.pendingImport) return;
 
     const customer = state.pendingImport.customer || {};
-    importSummary.textContent = `${state.pendingImport.id} - ${customer.name || "Client non renseigné"} - ${
-      state.pendingImport.items.length
-    } article(s) - ${PizzaMan.formatMoney(PizzaMan.orderTotal(state.pendingImport))}`;
+    importSummary.textContent = `${state.pendingImport.id} - ${customer.name || "Client non renseigné"} - ${PizzaMan.articleCount(
+      state.pendingImport,
+    )} article(s) - ${PizzaMan.formatMoney(PizzaMan.orderTotal(state.pendingImport))}`;
     refreshIcons();
   }
 
@@ -262,6 +277,36 @@
     }
   }
 
+  async function updateOrderSchedule(id, plannedTime) {
+    const order = getOrder(id);
+    if (!order) return;
+
+    const customer = { ...(order.customer || {}) };
+    if (plannedTime) {
+      customer.plannedTime = plannedTime;
+    } else {
+      delete customer.plannedTime;
+    }
+
+    try {
+      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
+        await PizzaManDb.updateOrderCustomer(id, customer);
+      } else {
+        const orders = PizzaMan.loadOrders().map((storedOrder) =>
+          storedOrder.id === id ? { ...storedOrder, customer } : storedOrder,
+        );
+        PizzaMan.saveOrders(orders);
+      }
+
+      state.orders = state.orders.map((storedOrder) => (storedOrder.id === id ? { ...storedOrder, customer } : storedOrder));
+      renderSchedule();
+      renderOrdersList();
+      setAdminFeedback("Heure de livraison mise à jour.");
+    } catch (error) {
+      setAdminFeedback("Modification de l'heure impossible.");
+    }
+  }
+
   async function deleteOrder(id) {
     try {
       if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
@@ -276,6 +321,7 @@
 
   async function renderOrders() {
     state.orders = await loadOrders();
+    renderSchedule();
     renderOrdersList();
   }
 
@@ -284,6 +330,60 @@
     adminEmpty.hidden = orders.length > 0;
     ordersList.innerHTML = orders.map(renderOrderCard).join("");
     refreshIcons();
+  }
+
+  function renderSchedule() {
+    const deliveries = state.orders
+      .filter((order) => order.status !== "Terminée")
+      .filter((order) => (order.customer || {}).mode === "Livraison")
+      .sort(compareOrdersByTime);
+
+    scheduleEmpty.hidden = deliveries.length > 0;
+    scheduleList.innerHTML = deliveries.map(renderScheduleCard).join("");
+    refreshIcons();
+  }
+
+  function compareOrdersByTime(a, b) {
+    const aTime = timeToMinutes(PizzaMan.orderTimeValue(a));
+    const bTime = timeToMinutes(PizzaMan.orderTimeValue(b));
+    if (aTime !== bTime) return aTime - bTime;
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  }
+
+  function timeToMinutes(time) {
+    if (!time) return Number.MAX_SAFE_INTEGER;
+    const [hours, minutes] = String(time).split(":").map(Number);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return Number.MAX_SAFE_INTEGER;
+    return hours * 60 + minutes;
+  }
+
+  function renderScheduleCard(order) {
+    const customer = order.customer || {};
+    const orderId = PizzaMan.escapeHtml(order.id);
+    const time = PizzaMan.orderTimeValue(order);
+    const timeLabel = PizzaMan.escapeHtml(PizzaMan.formatTimeLabel(time));
+    const address = PizzaMan.escapeHtml(customer.address || "Adresse non renseignée");
+    const name = PizzaMan.escapeHtml(customer.name || "Client non renseigné");
+    const phone = PizzaMan.escapeHtml(customer.phone || "Téléphone non renseigné");
+
+    return `
+      <article class="schedule-card">
+        <div class="schedule-time">
+          <strong>${timeLabel}</strong>
+          <input type="time" value="${PizzaMan.escapeHtml(time)}" data-schedule-order="${orderId}" aria-label="Heure prévue ${orderId}">
+        </div>
+        <div class="schedule-details">
+          <h3>${name}</h3>
+          <p>${address}</p>
+          <span>${phone}</span>
+        </div>
+        <div class="schedule-meta">
+          <span>${PizzaMan.articleCount(order)} article(s)</span>
+          <span>${PizzaMan.escapeHtml(order.status || "À faire")}</span>
+          <strong>${PizzaMan.formatMoney(PizzaMan.orderTotal(order))}</strong>
+        </div>
+      </article>
+    `;
   }
 
   function renderOrderCard(order) {
@@ -319,11 +419,14 @@
           <div class="order-meta">
             <span>${status}</span>
             <span>${PizzaMan.escapeHtml(dateLabel)}</span>
+            <span>${PizzaMan.articleCount(order)} article(s)</span>
             <span>${PizzaMan.formatMoney(PizzaMan.orderTotal(order))}</span>
           </div>
           <h2>${orderId}</h2>
           <p>${customerName} - ${customerPhone}</p>
           <p>${customerMode}${customerAddress ? ` - ${customerAddress}` : ""}</p>
+          ${customer.desiredTime ? `<p>Heure souhaitée: ${PizzaMan.formatTimeLabel(customer.desiredTime)}</p>` : ""}
+          ${customer.plannedTime ? `<p>Heure prévue: ${PizzaMan.formatTimeLabel(customer.plannedTime)}</p>` : ""}
           <ul>${items}</ul>
           ${delivery ? `<p>Frais livraison: ${PizzaMan.formatMoney(delivery)}</p>` : ""}
           ${deliveryWarning}
@@ -334,6 +437,10 @@
               .map((status) => `<option value="${status}" ${status === order.status ? "selected" : ""}>${status}</option>`)
               .join("")}
           </select>
+          <label class="order-time-control">
+            Heure prévue
+            <input type="time" value="${PizzaMan.escapeHtml(PizzaMan.orderTimeValue(order))}" data-schedule-order="${orderId}">
+          </label>
           <button class="secondary-action" type="button" data-copy-order="${orderId}">
             <i data-lucide="copy" aria-hidden="true"></i>
             Copier
