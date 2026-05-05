@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pizza'Man - Commander</title>
+    <meta
+      name="description"
+      content="Composez votre commande Pizza'Man, choisissez vos pizzas, ajoutez des suppléments et envoyez la commande à la pizzeria."
+    />
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Pizza'Man accueil">
+        <img src="assets/logo.svg" alt="" />
+        <span>Pizza'Man</span>
+      </a>
+      <nav class="top-nav" aria-label="Navigation principale">
+        <a href="#carte">Carte</a>
+        <a href="#commande">Commande</a>
+        <a href="pizzeria.html">Pizzeria</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro-band" aria-labelledby="page-title">
+        <div class="intro-copy">
+          <p class="kicker">Commande simple, rapide, sans compte</p>
+          <h1 id="page-title">Compose ta pizza, envoie la commande.</h1>
+          <p>
+            Choisis la taille, ajoute des suppléments, précise une modification,
+            puis partage le message ou le lien de commande avec la pizzeria.
+          </p>
+        </div>
+        <div class="intro-status" aria-label="Informations pizzeria">
+          <span class="status-dot"></span>
+          <span>Commande à transmettre</span>
+        </div>
+      </section>
+
+      <section class="order-layout">
+        <div class="menu-column">
+          <div class="section-heading" id="carte">
+            <p class="kicker">Carte</p>
+            <h2>Pizzas</h2>
+          </div>
+          <div class="menu-grid" id="menu-grid"></div>
+        </div>
+
+        <aside class="cart-panel" id="commande" aria-labelledby="cart-title">
+          <div class="section-heading compact">
+            <p class="kicker">Panier</p>
+            <h2 id="cart-title">Commande</h2>
+          </div>
+
+          <div class="empty-cart" id="empty-cart">
+            <i data-lucide="shopping-basket" aria-hidden="true"></i>
+            <p>Aucune pizza ajoutée.</p>
+          </div>
+
+          <div class="cart-items" id="cart-items"></div>
+
+          <div class="cart-total" aria-live="polite">
+            <span>Total</span>
+            <strong id="cart-total">0,00 EUR</strong>
+          </div>
+
+          <form class="customer-form" id="customer-form">
+            <label>
+              Nom
+              <input name="name" autocomplete="name" placeholder="Ex: Thomas" />
+            </label>
+            <label>
+              Téléphone
+              <input
+                name="phone"
+                autocomplete="tel"
+                inputmode="tel"
+                placeholder="Ex: 06 12 34 56 78"
+              />
+            </label>
+            <label>
+              Mode de commande
+              <select name="mode">
+                <option value="À emporter">À emporter</option>
+                <option value="Livraison">Livraison</option>
+              </select>
+            </label>
+            <label>
+              Adresse ou précision
+              <textarea
+                name="address"
+                rows="3"
+                placeholder="Adresse, heure souhaitée, code porte..."
+              ></textarea>
+            </label>
+          </form>
+
+          <div class="message-preview">
+            <label for="message-output">Message généré</label>
+            <textarea id="message-output" rows="9" readonly></textarea>
+          </div>
+
+          <div class="action-grid">
+            <button class="primary-action" id="copy-message" type="button">
+              <i data-lucide="copy" aria-hidden="true"></i>
+              Copier
+            </button>
+            <a class="secondary-action" id="whatsapp-link" href="#" target="_blank" rel="noreferrer">
+              <i data-lucide="send" aria-hidden="true"></i>
+              WhatsApp
+            </a>
+            <a class="secondary-action" id="sms-link" href="#">
+              <i data-lucide="message-square" aria-hidden="true"></i>
+              SMS
+            </a>
+            <button class="secondary-action" id="copy-order-link" type="button">
+              <i data-lucide="link" aria-hidden="true"></i>
+              Lien pizzeria
+            </button>
+          </div>
+
+          <p class="form-note" id="client-feedback" role="status" aria-live="polite"></p>
+        </aside>
+      </section>
+    </main>
+
+    <button class="mobile-cart-jump" id="mobile-cart-jump" type="button">
+      <i data-lucide="shopping-cart" aria-hidden="true"></i>
+      <span id="mobile-cart-label">Voir la commande</span>
+    </button>
+
+    <dialog class="pizza-dialog" id="pizza-dialog">
+      <form method="dialog" class="dialog-card" id="pizza-form">
+        <button class="icon-button close-dialog" aria-label="Fermer" type="button">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+        <div class="dialog-media">
+          <img id="dialog-image" alt="" />
+        </div>
+        <div class="dialog-content">
+          <p class="kicker">Personnalisation</p>
+          <h2 id="dialog-title"></h2>
+          <p id="dialog-description"></p>
+
+          <fieldset class="segmented-field">
+            <legend>Taille</legend>
+            <div class="segmented-control" id="size-control"></div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Suppléments</legend>
+            <div class="extras-grid" id="extras-grid"></div>
+          </fieldset>
+
+          <label>
+            Modification
+            <textarea
+              id="modification-input"
+              rows="3"
+              placeholder="Ex: sans olives, bien cuite, moins de fromage..."
+            ></textarea>
+          </label>
+
+          <div class="quantity-row">
+            <span>Quantité</span>
+            <div class="stepper">
+              <button type="button" id="qty-minus" aria-label="Retirer une pizza">
+                <i data-lucide="minus" aria-hidden="true"></i>
+              </button>
+              <strong id="quantity-value">1</strong>
+              <button type="button" id="qty-plus" aria-label="Ajouter une pizza">
+                <i data-lucide="plus" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <button class="primary-action full-width" id="add-to-cart" type="submit">
+            Ajouter - <span id="dialog-price">0,00 EUR</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="js/shared.js"></script>
+    <script src="js/client.js"></script>
+  </body>
+</html>

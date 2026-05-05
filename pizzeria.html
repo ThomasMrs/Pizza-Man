@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pizza'Man - Pizzeria</title>
+    <meta
+      name="description"
+      content="Interface pizzeria Pizza'Man pour ajouter, suivre et préparer les commandes reçues."
+    />
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="admin-body">
+    <header class="site-header admin-header">
+      <a class="brand" href="index.html" aria-label="Pizza'Man accueil">
+        <img src="assets/logo.svg" alt="" />
+        <span>Pizza'Man</span>
+      </a>
+      <nav class="top-nav" aria-label="Navigation principale">
+        <a href="index.html">Client</a>
+        <a href="#orders-panel">Commandes</a>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="login-panel" id="login-panel" aria-labelledby="login-title">
+        <div>
+          <p class="kicker">Accès pizzeria</p>
+          <h1 id="login-title">Connexion</h1>
+          <p>
+            L’espace pizzeria permet d’importer les commandes envoyées par lien
+            et de suivre leur préparation.
+          </p>
+        </div>
+        <form id="login-form" class="login-form">
+          <label>
+            Identifiant
+            <input name="username" autocomplete="username" required />
+          </label>
+          <label>
+            Mot de passe
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button class="primary-action full-width" type="submit">
+            <i data-lucide="lock-keyhole" aria-hidden="true"></i>
+            Se connecter
+          </button>
+          <p class="form-note" id="login-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="admin-workspace" id="admin-workspace" hidden>
+        <div class="admin-title-row">
+          <div>
+            <p class="kicker">Production</p>
+            <h1>Liste des commandes</h1>
+          </div>
+          <button class="secondary-action" id="logout-button" type="button">
+            <i data-lucide="log-out" aria-hidden="true"></i>
+            Déconnexion
+          </button>
+        </div>
+
+        <div class="import-panel" id="import-panel" hidden>
+          <div>
+            <p class="kicker">Commande reçue</p>
+            <h2>Ajouter cette commande à la liste</h2>
+            <p id="import-summary"></p>
+          </div>
+          <button class="primary-action" id="accept-import" type="button">
+            <i data-lucide="plus-circle" aria-hidden="true"></i>
+            Ajouter
+          </button>
+        </div>
+
+        <div class="manual-import">
+          <label for="manual-link">Coller un lien de commande</label>
+          <div class="inline-tools">
+            <input id="manual-link" placeholder="https://.../pizzeria.html?order=..." />
+            <button class="secondary-action" id="manual-import-button" type="button">
+              <i data-lucide="download" aria-hidden="true"></i>
+              Importer
+            </button>
+          </div>
+          <p class="form-note" id="admin-feedback" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="admin-toolbar" aria-label="Filtres commandes">
+          <button class="filter-button active" data-filter="all" type="button">Toutes</button>
+          <button class="filter-button" data-filter="À faire" type="button">À faire</button>
+          <button class="filter-button" data-filter="En préparation" type="button">En préparation</button>
+          <button class="filter-button" data-filter="Prête" type="button">Prêtes</button>
+          <button class="filter-button" data-filter="Terminée" type="button">Terminées</button>
+        </div>
+
+        <section class="orders-panel" id="orders-panel" aria-live="polite">
+          <div class="empty-cart admin-empty" id="admin-empty">
+            <i data-lucide="clipboard-list" aria-hidden="true"></i>
+            <p>Aucune commande enregistrée.</p>
+          </div>
+          <div class="orders-list" id="orders-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="js/shared.js"></script>
+    <script src="js/admin.js"></script>
+  </body>
+</html>
