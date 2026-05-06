@@ -504,9 +504,16 @@
   }
 
   function deliveryCharge(order) {
-    return order.customer && order.customer.mode === "Livraison" && (order.items || []).length
+    return order.customer && order.customer.mode === "Livraison" && pizzaCount(order) >= business.deliveryMinimum
       ? business.deliveryFee
       : 0;
+  }
+
+  function deliveryMinimumWarning(order) {
+    const customer = order.customer || {};
+    return customer.mode === "Livraison" && (order.items || []).length > 0 && pizzaCount(order) < business.deliveryMinimum
+      ? `Livraison possible à partir de ${business.deliveryMinimum} pizzas.`
+      : "";
   }
 
   function orderTotal(order) {
@@ -557,10 +564,7 @@
   function formatOrderMessage(order) {
     const customer = order.customer || {};
     const delivery = deliveryCharge(order);
-    const deliveryWarning =
-      customer.mode === "Livraison" && pizzaCount(order) < business.deliveryMinimum
-        ? `Attention: livraison à partir de ${business.deliveryMinimum} pizzas.`
-        : "";
+    const deliveryWarning = deliveryMinimumWarning(order);
     const lines = [
       `Commande Pizza'Man ${order.id}`,
       "",
@@ -645,6 +649,7 @@
     orderTimeValue,
     formatTimeLabel,
     deliveryCharge,
+    deliveryMinimumWarning,
     orderTotal,
     itemSummary,
     createOrder,

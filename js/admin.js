@@ -89,7 +89,8 @@
 
     acceptImport.addEventListener("click", async () => {
       if (!state.pendingImport) return;
-      await addOrder(state.pendingImport);
+      const added = await addOrder(state.pendingImport);
+      if (!added) return;
       state.pendingImport = null;
       renderImportPanel();
       await renderOrders();
@@ -234,6 +235,12 @@
   }
 
   async function addOrder(order) {
+    const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
+    if (deliveryWarning) {
+      setAdminFeedback(deliveryWarning);
+      return false;
+    }
+
     try {
       if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
         await PizzaManDb.upsertOrder(order, { source: "pizzeria" });
@@ -243,9 +250,12 @@
         PizzaMan.saveOrders(nextOrders);
       }
       setAdminFeedback("Commande ajoutée à la liste.");
+      return true;
     } catch (error) {
       setAdminFeedback("Ajout impossible dans Supabase. Vérifie la migration et la connexion Auth.");
     }
+
+    return false;
   }
 
   function getOrder(id) {
@@ -301,7 +311,7 @@
       state.orders = state.orders.map((storedOrder) => (storedOrder.id === id ? { ...storedOrder, customer } : storedOrder));
       renderSchedule();
       renderOrdersList();
-      setAdminFeedback("Heure de livraison mise à jour.");
+      setAdminFeedback("Heure prévue mise à jour.");
     } catch (error) {
       setAdminFeedback("Modification de l'heure impossible.");
     }
@@ -333,13 +343,12 @@
   }
 
   function renderSchedule() {
-    const deliveries = state.orders
+    const scheduledOrders = state.orders
       .filter((order) => order.status !== "Terminée")
-      .filter((order) => (order.customer || {}).mode === "Livraison")
       .sort(compareOrdersByTime);
 
-    scheduleEmpty.hidden = deliveries.length > 0;
-    scheduleList.innerHTML = deliveries.map(renderScheduleCard).join("");
+    scheduleEmpty.hidden = scheduledOrders.length > 0;
+    scheduleList.innerHTML = scheduledOrders.map(renderScheduleCard).join("");
     refreshIcons();
   }
 
@@ -362,7 +371,10 @@
     const orderId = PizzaMan.escapeHtml(order.id);
     const time = PizzaMan.orderTimeValue(order);
     const timeLabel = PizzaMan.escapeHtml(PizzaMan.formatTimeLabel(time));
-    const address = PizzaMan.escapeHtml(customer.address || "Adresse non renseignée");
+    const mode = PizzaMan.escapeHtml(customer.mode || "À emporter");
+    const address = PizzaMan.escapeHtml(
+      customer.address || (customer.mode === "Livraison" ? "Adresse non renseignée" : ""),
+    );
     const name = PizzaMan.escapeHtml(customer.name || "Client non renseigné");
     const phone = PizzaMan.escapeHtml(customer.phone || "Téléphone non renseigné");
 
@@ -374,7 +386,8 @@
         </div>
         <div class="schedule-details">
           <h3>${name}</h3>
-          <p>${address}</p>
+          <p>${mode}</p>
+          ${address ? `<p>${address}</p>` : ""}
           <span>${phone}</span>
         </div>
         <div class="schedule-meta">
@@ -408,10 +421,8 @@
     const customerMode = PizzaMan.escapeHtml(customer.mode || "À emporter");
     const customerAddress = PizzaMan.escapeHtml(customer.address || "");
     const delivery = PizzaMan.deliveryCharge(order);
-    const deliveryWarning =
-      customer.mode === "Livraison" && PizzaMan.pizzaCount(order) < PizzaMan.business.deliveryMinimum
-        ? `<p>Attention: livraison à partir de ${PizzaMan.business.deliveryMinimum} pizzas.</p>`
-        : "";
+    const deliveryWarningMessage = PizzaMan.deliveryMinimumWarning(order);
+    const deliveryWarning = deliveryWarningMessage ? `<p>${PizzaMan.escapeHtml(deliveryWarningMessage)}</p>` : "";
 
     return `
       <article class="order-card ${statusClass}">

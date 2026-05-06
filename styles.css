@@ -609,6 +609,10 @@ textarea:focus {
   font-weight: 850;
 }
 
+.mobile-cart-jump.is-hidden {
+  display: none;
+}
+
 .pizza-dialog {
   width: min(880px, calc(100vw - 26px));
   max-height: calc(100vh - 26px);
@@ -865,9 +869,15 @@ fieldset {
   background: #fff;
 }
 
+.schedule-card > *,
+.order-card > * {
+  min-width: 0;
+}
+
 .schedule-time {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .schedule-time strong {
@@ -878,6 +888,9 @@ fieldset {
 
 .schedule-time input,
 .order-time-control input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 42px;
   padding: 8px 10px;
 }
@@ -1045,6 +1058,16 @@ fieldset {
   .schedule-meta {
     justify-items: start;
     text-align: left;
+  }
+
+  .schedule-card {
+    overflow: hidden;
+  }
+
+  .schedule-time input,
+  .order-time-control input {
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   .pizza-card p {

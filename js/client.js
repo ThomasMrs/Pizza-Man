@@ -21,6 +21,7 @@
   const whatsappLink = document.querySelector("#whatsapp-link");
   const smsLink = document.querySelector("#sms-link");
   const feedback = document.querySelector("#client-feedback");
+  const deliveryMinimumWarning = document.querySelector("#delivery-minimum-warning");
   const mobileCartJump = document.querySelector("#mobile-cart-jump");
   const mobileCartLabel = document.querySelector("#mobile-cart-label");
   const dialog = document.querySelector("#pizza-dialog");
@@ -44,6 +45,7 @@
     renderMenu();
     renderCart();
     bindEvents();
+    setupMobileCartVisibility();
     refreshIcons();
   }
 
@@ -221,6 +223,20 @@
     });
   }
 
+  function setupMobileCartVisibility() {
+    const cartPanel = document.querySelector("#commande");
+    if (!cartPanel || !("IntersectionObserver" in window)) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        mobileCartJump.classList.toggle("is-hidden", Boolean(entry && entry.isIntersecting));
+      },
+      { threshold: 0.2 },
+    );
+
+    observer.observe(cartPanel);
+  }
+
   function openDialog(pizzaId, editingIndex = null) {
     const item = PizzaMan.getMenuItem(pizzaId);
     if (!item) return;
@@ -365,17 +381,23 @@
 
     const order = getCurrentOrder();
     const total = PizzaMan.orderTotal(order);
-    const pizzeriaLink = state.cart.length > 0 ? PizzaMan.buildPizzeriaLink(order) : "";
+    const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
+    const pizzeriaLink = state.cart.length > 0 && !deliveryWarning ? PizzaMan.buildPizzeriaLink(order) : "";
     const clientMessage =
       state.cart.length > 0
-        ? `${PizzaMan.formatOrderMessage(order)}\n\nLien pizzeria: ${pizzeriaLink}`
+        ? [PizzaMan.formatOrderMessage(order), pizzeriaLink ? `Lien pizzeria: ${pizzeriaLink}` : ""]
+            .filter(Boolean)
+            .join("\n\n")
         : "Ajoute un article pour générer le message de commande.";
     cartTotal.textContent = PizzaMan.formatMoney(total);
     messageOutput.value = clientMessage;
+    deliveryMinimumWarning.textContent = deliveryWarning;
+    deliveryMinimumWarning.hidden = !deliveryWarning;
 
     const encodedMessage = encodeURIComponent(messageOutput.value);
-    whatsappLink.href = state.cart.length > 0 ? `${PizzaMan.business.whatsappHref}?text=${encodedMessage}` : "#";
-    smsLink.href = state.cart.length > 0 ? `${PizzaMan.business.smsHref}?&body=${encodedMessage}` : "#";
+    whatsappLink.href =
+      state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.whatsappHref}?text=${encodedMessage}` : "#";
+    smsLink.href = state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.smsHref}?&body=${encodedMessage}` : "#";
     const articleCount = PizzaMan.articleCount(order);
     cartCount.textContent = `${articleCount} article${articleCount > 1 ? "s" : ""}`;
     mobileCartLabel.textContent =
@@ -391,6 +413,11 @@
     }
 
     const order = getCurrentOrder();
+    const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
+    if (deliveryWarning) {
+      setFeedback(deliveryWarning);
+      return null;
+    }
 
     try {
       if (window.PizzaManDb) {
