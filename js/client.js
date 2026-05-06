@@ -170,7 +170,16 @@
       updateDialogState();
     });
 
-    extrasGrid.addEventListener("change", () => {
+    extrasGrid.addEventListener("change", (event) => {
+      const input = event.target.closest("input[type='checkbox']");
+      const selectedInputs = Array.from(extrasGrid.querySelectorAll("input:checked"));
+      const maxExtras = PizzaMan.business.maxExtrasPerPizza;
+
+      if (input && input.checked && selectedInputs.length > maxExtras) {
+        input.checked = false;
+        setFeedback(`Maximum ${maxExtras} suppléments par pizza.`);
+      }
+
       state.selectedExtras = new Set(
         Array.from(extrasGrid.querySelectorAll("input:checked")).map((input) => input.value),
       );
@@ -269,6 +278,12 @@
       state.selectedExtras.clear();
     }
 
+    const maxExtras = PizzaMan.business.maxExtrasPerPizza;
+    if (state.selectedExtras.size > maxExtras) {
+      state.selectedExtras = new Set(Array.from(state.selectedExtras).slice(0, maxExtras));
+      setFeedback(`Maximum ${maxExtras} suppléments par pizza.`);
+    }
+
     if (!PizzaMan.allowsModification(item)) {
       modificationInput.value = "";
     }
@@ -279,8 +294,12 @@
       button.classList.toggle("active", button.dataset.size === state.selectedSize);
     });
 
+    const extraLimitReached = state.selectedExtras.size >= maxExtras;
     Array.from(extrasGrid.querySelectorAll("input")).forEach((input) => {
-      input.checked = state.selectedExtras.has(input.value);
+      const checked = state.selectedExtras.has(input.value);
+      input.checked = checked;
+      input.disabled = !checked && extraLimitReached;
+      input.closest(".extra-option").classList.toggle("is-disabled", input.disabled);
     });
 
     quantityValue.textContent = state.quantity;
@@ -299,7 +318,9 @@
     const item = {
       pizzaId: state.selectedPizzaId,
       size: state.selectedSize,
-      extras: PizzaMan.allowsExtras(itemData) ? Array.from(state.selectedExtras) : [],
+      extras: PizzaMan.allowsExtras(itemData)
+        ? Array.from(state.selectedExtras).slice(0, PizzaMan.business.maxExtrasPerPizza)
+        : [],
       modification: PizzaMan.allowsModification(itemData) ? modificationInput.value.trim() : "",
       quantity: state.quantity,
     };

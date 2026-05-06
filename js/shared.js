@@ -13,6 +13,7 @@
     deliveryZones: "Le Boulou, Céret, Maureillas, St Jean",
     deliveryFee: 4,
     deliveryMinimum: 2,
+    maxExtrasPerPizza: 3,
     deliveryNote: "Livraison à partir de 2 pizzas, pas de pizza offerte en livraison.",
     allergenNote: "Liste des allergènes disponible sur demande.",
   };
@@ -557,7 +558,10 @@
         desiredTime: customer.desiredTime || "",
         plannedTime: customer.plannedTime || "",
       },
-      items: cart.map((item) => ({ ...item })),
+      items: cart.map((item) => ({
+        ...item,
+        extras: Array.isArray(item.extras) ? item.extras.slice(0, business.maxExtrasPerPizza) : [],
+      })),
     };
   }
 

@@ -219,7 +219,12 @@
       createdAt: order.createdAt || new Date().toISOString(),
       status: order.status || "À faire",
       customer: order.customer || {},
-      items: Array.isArray(order.items) ? order.items : [],
+      items: Array.isArray(order.items)
+        ? order.items.map((item) => ({
+            ...item,
+            extras: Array.isArray(item.extras) ? item.extras.slice(0, PizzaMan.business.maxExtrasPerPizza) : [],
+          }))
+        : [],
     };
   }
 

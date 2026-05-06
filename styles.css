@@ -729,6 +729,10 @@ fieldset {
   accent-color: var(--green);
 }
 
+.extra-option.is-disabled {
+  opacity: 0.52;
+}
+
 .quantity-row {
   display: flex;
   align-items: center;
