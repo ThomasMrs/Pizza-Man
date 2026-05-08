@@ -3,7 +3,6 @@
     pendingImport: null,
     filter: "all",
     orders: [],
-    localAuth: false,
   };
 
   const loginPanel = document.querySelector("#login-panel");
@@ -46,27 +45,17 @@
 
       loginFeedback.textContent = "";
 
-      if (window.PizzaManDb && PizzaManDb.isConfigured) {
-        try {
-          await PizzaManDb.signIn(username, password);
-          sessionStorage.removeItem(PizzaMan.config.sessionKey);
-          state.localAuth = false;
-          await renderAuth();
-          return;
-        } catch (error) {
-          loginFeedback.textContent = "Connexion Supabase impossible. Vérifie l'utilisateur Auth ou utilise l'accès local.";
-        }
-      }
-
-      if (username === PizzaMan.config.adminUsername && password === PizzaMan.config.adminPassword) {
-        sessionStorage.setItem(PizzaMan.config.sessionKey, "1");
-        state.localAuth = true;
-        loginFeedback.textContent = "";
-        await renderAuth();
+      if (!window.PizzaManDb || !PizzaManDb.isConfigured) {
+        loginFeedback.textContent = "Connexion sécurisée indisponible. Vérifie la configuration Supabase.";
         return;
       }
 
-      if (!loginFeedback.textContent) {
+      try {
+        await PizzaManDb.signIn(username, password);
+        loginFeedback.textContent = "";
+        await renderAuth();
+        return;
+      } catch (error) {
         loginFeedback.textContent = "Identifiant ou mot de passe incorrect.";
       }
     });
@@ -80,8 +69,6 @@
         }
       }
 
-      sessionStorage.removeItem(PizzaMan.config.sessionKey);
-      state.localAuth = false;
       await renderAuth();
     });
 
@@ -162,7 +149,6 @@
   }
 
   async function renderAuth() {
-    const localAuthenticated = sessionStorage.getItem(PizzaMan.config.sessionKey) === "1";
     let supabaseAuthenticated = false;
 
     if (window.PizzaManDb && PizzaManDb.isConfigured) {
@@ -173,8 +159,7 @@
       }
     }
 
-    state.localAuth = localAuthenticated && !supabaseAuthenticated;
-    const authenticated = localAuthenticated || supabaseAuthenticated;
+    const authenticated = supabaseAuthenticated;
     loginPanel.hidden = authenticated;
     workspace.hidden = !authenticated;
 
@@ -247,13 +232,7 @@
     }
 
     try {
-      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
-        await PizzaManDb.upsertOrder(order, { source: "pizzeria" });
-      } else {
-        const orders = PizzaMan.loadOrders();
-        const nextOrders = [order, ...orders.filter((existingOrder) => existingOrder.id !== order.id)];
-        PizzaMan.saveOrders(nextOrders);
-      }
+      await PizzaManDb.upsertOrder(order, { source: "pizzeria" });
       setAdminFeedback("Commande ajoutée à la liste.");
       return true;
     } catch (error) {
@@ -269,24 +248,17 @@
 
   async function loadOrders() {
     try {
-      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
-        return await PizzaManDb.listOrders();
-      }
+      return await PizzaManDb.listOrders();
     } catch (error) {
-      setAdminFeedback("Lecture Supabase impossible. Affichage des commandes locales.");
+      setAdminFeedback("Lecture Supabase impossible.");
     }
 
-    return PizzaMan.loadOrders();
+    return [];
   }
 
   async function updateOrderStatus(id, status) {
     try {
-      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
-        await PizzaManDb.updateOrderStatus(id, status);
-      } else {
-        const orders = PizzaMan.loadOrders().map((order) => (order.id === id ? { ...order, status } : order));
-        PizzaMan.saveOrders(orders);
-      }
+      await PizzaManDb.updateOrderStatus(id, status);
     } catch (error) {
       setAdminFeedback("Modification du statut impossible.");
     }
@@ -304,14 +276,7 @@
     }
 
     try {
-      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
-        await PizzaManDb.updateOrderCustomer(id, customer);
-      } else {
-        const orders = PizzaMan.loadOrders().map((storedOrder) =>
-          storedOrder.id === id ? { ...storedOrder, customer } : storedOrder,
-        );
-        PizzaMan.saveOrders(orders);
-      }
+      await PizzaManDb.updateOrderCustomer(id, customer);
 
       state.orders = state.orders.map((storedOrder) => (storedOrder.id === id ? { ...storedOrder, customer } : storedOrder));
       renderSchedule();
@@ -324,11 +289,7 @@
 
   async function deleteOrder(id) {
     try {
-      if (window.PizzaManDb && PizzaManDb.isConfigured && !state.localAuth) {
-        await PizzaManDb.deleteOrder(id);
-      } else {
-        PizzaMan.saveOrders(PizzaMan.loadOrders().filter((order) => order.id !== id));
-      }
+      await PizzaManDb.deleteOrder(id);
     } catch (error) {
       setAdminFeedback("Suppression impossible.");
     }

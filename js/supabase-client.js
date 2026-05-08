@@ -34,6 +34,15 @@
     };
   }
 
+  function resolveAuthEmail(identifier) {
+    const value = String(identifier || "").trim();
+    if (value.includes("@")) return value;
+    if (value.toLowerCase() === PizzaMan.config.adminUsername.toLowerCase()) {
+      return PizzaMan.config.adminAuthEmail;
+    }
+    return value;
+  }
+
   async function getSession() {
     if (!client) return null;
     const { data, error } = await client.auth.getSession();
@@ -41,8 +50,9 @@
     return data.session;
   }
 
-  async function signIn(email, password) {
+  async function signIn(identifier, password) {
     if (!client) throw new Error("Supabase n'est pas configuré.");
+    const email = resolveAuthEmail(identifier);
     const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw error;
     return data.session;
@@ -70,12 +80,7 @@
   }
 
   async function upsertOrder(order, options = {}) {
-    if (!client) {
-      const orders = PizzaMan.loadOrders();
-      const nextOrders = [order, ...orders.filter((existingOrder) => existingOrder.id !== order.id)];
-      PizzaMan.saveOrders(nextOrders);
-      return { order, stored: "local" };
-    }
+    if (!client) throw new Error("Supabase n'est pas configuré.");
 
     const { error } = await client
       .from("orders")
@@ -85,7 +90,7 @@
   }
 
   async function listOrders() {
-    if (!client) return PizzaMan.loadOrders();
+    if (!client) throw new Error("Supabase n'est pas configuré.");
 
     const { data, error } = await client.from("orders").select("*").order("created_at", { ascending: false });
     if (error) throw error;
@@ -93,32 +98,21 @@
   }
 
   async function updateOrderStatus(id, status) {
-    if (!client) {
-      const orders = PizzaMan.loadOrders().map((order) => (order.id === id ? { ...order, status } : order));
-      PizzaMan.saveOrders(orders);
-      return;
-    }
+    if (!client) throw new Error("Supabase n'est pas configuré.");
 
     const { error } = await client.from("orders").update({ status }).eq("id", id);
     if (error) throw error;
   }
 
   async function updateOrderCustomer(id, customer) {
-    if (!client) {
-      const orders = PizzaMan.loadOrders().map((order) => (order.id === id ? { ...order, customer } : order));
-      PizzaMan.saveOrders(orders);
-      return;
-    }
+    if (!client) throw new Error("Supabase n'est pas configuré.");
 
     const { error } = await client.from("orders").update({ customer }).eq("id", id);
     if (error) throw error;
   }
 
   async function deleteOrder(id) {
-    if (!client) {
-      PizzaMan.saveOrders(PizzaMan.loadOrders().filter((order) => order.id !== id));
-      return;
-    }
+    if (!client) throw new Error("Supabase n'est pas configuré.");
 
     const { error } = await client.from("orders").delete().eq("id", id);
     if (error) throw error;

@@ -18,7 +18,7 @@ pizzeria via un lien.
 ## Fichiers
 
 - `index.html` : interface client responsive, sans compte.
-- `pizzeria.html` : interface pizzeria avec connexion simple.
+- `pizzeria.html` : interface pizzeria avec connexion sécurisée Supabase Auth.
 - `js/shared.js` : carte complète, suppléments, prix et helpers de commande.
 - `js/supabase-client.js` : connexion Supabase pour enregistrer les commandes.
 - `js/client.js` : panier, personnalisation, message et lien de commande.
@@ -30,16 +30,23 @@ pizzeria via un lien.
 
 ## Accès pizzeria
 
-Identifiant par défaut : `pizzeria`
+L'accès pizzeria utilise Supabase Auth. Aucun mot de passe pizzeria ne doit être
+stocké dans le code du site ou dans ce README.
 
-Mot de passe par défaut : `pizza2026`
+Alias affiché côté pizzeria : `christian`
 
-Ces valeurs se changent dans `js/shared.js`.
+Email Supabase associé : `christian@pizzamanstjean.fr`
 
-Avec Supabase, l'accès recommandé est un utilisateur Supabase Auth. Créer un
-utilisateur dans le dashboard Supabase, puis se connecter à l'espace pizzeria
-avec son email et son mot de passe. L'accès local ci-dessus reste un secours
-pour tester sans base distante.
+Créer cet utilisateur dans le dashboard Supabase, rubrique `Authentication` ->
+`Users`, puis définir son mot de passe dans Supabase. Le mot de passe sera stocké
+côté Supabase, pas dans les fichiers GitHub Pages. Sur `pizzeria.html`, se
+connecter avec l'identifiant `christian`.
+
+Les règles RLS Supabase limitent la lecture, la modification et la suppression
+des commandes à l'email `christian@pizzamanstjean.fr`.
+
+Après création du compte, désactiver les inscriptions publiques dans Supabase
+Auth pour éviter qu'un autre utilisateur puisse créer un compte non prévu.
 
 ## Fonctionnement des commandes
 
@@ -59,7 +66,7 @@ Le site génère ensuite :
 - un lien pizzeria.
 
 Le client peut renseigner une heure souhaitée. Côté pizzeria, le planning des
-livraisons affiche les commandes à livrer et permet d'ajuster l'heure prévue.
+commandes affiche les commandes actives et permet d'ajuster l'heure prévue.
 
 Quand le client copie ou envoie le message, le site tente aussi d'enregistrer la
 commande dans Supabase. Le lien pizzeria ouvre `pizzeria.html` avec la commande
@@ -99,8 +106,9 @@ branche `main` et le dossier racine.
 ## Important pour GitHub Pages
 
 GitHub Pages héberge uniquement des fichiers statiques. La version actuelle
-utilise Supabase pour une base partagée. Si Supabase n'est pas encore migré ou
-connecté, le site garde un secours local avec `localStorage` dans le navigateur.
+utilise Supabase pour une base partagée et Supabase Auth pour l'accès pizzeria.
+Si Supabase n'est pas configuré, l'espace pizzeria sécurisé ne peut pas se
+connecter.
 
 ## Mise à jour de la carte
 

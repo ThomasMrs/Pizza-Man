@@ -19,11 +19,10 @@
   };
 
   const config = {
-    adminUsername: "pizzeria",
-    adminPassword: "pizza2026",
+    adminUsername: "christian",
+    adminAuthEmail: "christian@pizzamanstjean.fr",
     currency: "EUR",
     orderStorageKey: "pizzaman-orders",
-    sessionKey: "pizzaman-admin-session",
     modificationPrice: 0.5,
     supplementPrices: {
       small: 1,
