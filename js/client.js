@@ -7,9 +7,6 @@
     selectedExtras: new Set(),
     quantity: 1,
     orderMeta: null,
-    slotUsage: new Map(),
-    availabilityLoaded: false,
-    availabilityError: false,
   };
 
   const menuGrid = document.querySelector("#menu-grid");
@@ -18,8 +15,8 @@
   const cartTotal = document.querySelector("#cart-total");
   const cartCount = document.querySelector("#cart-count");
   const customerForm = document.querySelector("#customer-form");
-  const desiredTimeSelect = document.querySelector("#desired-time");
-  const slotAvailabilityNote = document.querySelector("#slot-availability-note");
+  const openingStatus = document.querySelector("#opening-status");
+  const openingStatusLabel = document.querySelector("#opening-status-label");
   const messageOutput = document.querySelector("#message-output");
   const copyMessageButton = document.querySelector("#copy-message");
   const copyOrderLinkButton = document.querySelector("#copy-order-link");
@@ -48,11 +45,11 @@
 
   function init() {
     renderMenu();
-    renderTimeSlots();
+    renderOpeningStatus();
     renderCart();
     bindEvents();
     setupMobileCartVisibility();
-    refreshSlotAvailability();
+    window.setInterval(renderOpeningStatus, 60000);
     refreshIcons();
   }
 
@@ -60,6 +57,24 @@
     if (window.lucide) {
       window.lucide.createIcons();
     }
+  }
+
+  function renderOpeningStatus() {
+    if (!openingStatus || !openingStatusLabel) return;
+
+    const now = new Date();
+    const day = now.getDay();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const [startHours, startMinutes] = PizzaMan.business.orderStartTime.split(":").map(Number);
+    const [endHours, endMinutes] = PizzaMan.business.orderEndTime.split(":").map(Number);
+    const opensToday = day >= 2 && day <= 6;
+    const start = startHours * 60 + startMinutes;
+    const end = endHours * 60 + endMinutes;
+    const isOpen = opensToday && currentMinutes >= start && currentMinutes <= end;
+
+    openingStatus.classList.toggle("is-open", isOpen);
+    openingStatus.classList.toggle("is-closed", !isOpen);
+    openingStatusLabel.textContent = isOpen ? "Ouvert - jusqu'à 21h30" : "Fermé - mardi au samedi 17h à 21h30";
   }
 
   function renderMenu() {

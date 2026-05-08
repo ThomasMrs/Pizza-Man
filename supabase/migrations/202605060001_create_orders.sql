@@ -45,26 +45,26 @@ create policy "Pizzeria can create orders"
 on public.orders
 for insert
 to authenticated
-with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'pizzeria');
+with check ((auth.jwt() ->> 'email') = 'christian@pizza.com');
 
 drop policy if exists "Pizzeria can read orders" on public.orders;
 create policy "Pizzeria can read orders"
 on public.orders
 for select
 to authenticated
-using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'pizzeria');
+using ((auth.jwt() ->> 'email') = 'christian@pizza.com');
 
 drop policy if exists "Pizzeria can update orders" on public.orders;
 create policy "Pizzeria can update orders"
 on public.orders
 for update
 to authenticated
-using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'pizzeria')
-with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'pizzeria');
+using ((auth.jwt() ->> 'email') = 'christian@pizza.com')
+with check ((auth.jwt() ->> 'email') = 'christian@pizza.com');
 
 drop policy if exists "Pizzeria can delete orders" on public.orders;
 create policy "Pizzeria can delete orders"
 on public.orders
 for delete
 to authenticated
-using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'pizzeria');
+using ((auth.jwt() ->> 'email') = 'christian@pizza.com');

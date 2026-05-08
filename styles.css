@@ -213,6 +213,16 @@ a {
   box-shadow: 0 0 0 5px rgba(69, 212, 131, 0.17);
 }
 
+.intro-status.is-closed .status-dot {
+  background: var(--red);
+  box-shadow: 0 0 0 5px rgba(184, 50, 43, 0.18);
+}
+
+.intro-status.is-open .status-dot {
+  background: #45d483;
+  box-shadow: 0 0 0 5px rgba(69, 212, 131, 0.17);
+}
+
 .order-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(330px, 410px);

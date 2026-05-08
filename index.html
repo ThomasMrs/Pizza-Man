@@ -36,9 +36,9 @@
             modification, puis envoie la commande par SMS à la pizzeria.
           </p>
         </div>
-        <div class="intro-status" aria-label="Informations pizzeria">
+        <div class="intro-status" id="opening-status" aria-label="Statut pizzeria">
           <span class="status-dot"></span>
-          <span>Mardi au samedi - 17h à 21h30</span>
+          <span id="opening-status-label">Mardi au samedi - 17h à 21h30</span>
         </div>
       </section>
 
@@ -114,9 +114,8 @@
             <p class="option-note" id="delivery-minimum-warning" role="alert" hidden></p>
             <label>
               Heure souhaitée
-              <select name="desiredTime" id="desired-time" required></select>
+              <input name="desiredTime" type="time" />
             </label>
-            <p class="option-note" id="slot-availability-note" role="status" aria-live="polite"></p>
             <label>
               Adresse ou précision
               <textarea
