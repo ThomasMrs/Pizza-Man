@@ -7,6 +7,8 @@
     selectedExtras: new Set(),
     quantity: 1,
     orderMeta: null,
+    slotUsage: new Map(),
+    slotUsageLoaded: false,
   };
 
   const menuGrid = document.querySelector("#menu-grid");
@@ -51,6 +53,7 @@
     renderCart();
     bindEvents();
     setupMobileCartVisibility();
+    refreshSlotUsage();
     window.setInterval(renderOpeningStatus, 60000);
     refreshIcons();
   }
@@ -64,12 +67,48 @@
   function renderTimeSlots() {
     if (!desiredTimeSelect) return;
 
+    const selectedTime = desiredTimeSelect.value;
+    const cartPizzaCount = PizzaMan.pizzaCount({ items: state.cart });
+    const selectedAvailable = !selectedTime || isTimeAvailableForCart(selectedTime, cartPizzaCount);
+
     desiredTimeSelect.innerHTML = [
       '<option value="">Choisir une heure</option>',
-      ...PizzaMan.orderTimeSlots().map(
-        (time) => `<option value="${PizzaMan.escapeHtml(time)}">${PizzaMan.formatTimeLabel(time)}</option>`,
-      ),
+      ...PizzaMan.orderTimeSlots().map((time) => {
+        const remaining = PizzaMan.slotRemaining(state.slotUsage, time);
+        const disabled = remaining <= 0 || (cartPizzaCount > 0 && remaining < cartPizzaCount);
+        const label =
+          remaining <= 0
+            ? `${PizzaMan.formatTimeLabel(time)} - complet`
+            : `${PizzaMan.formatTimeLabel(time)} - ${remaining} pizza${remaining > 1 ? "s" : ""} restante${
+                remaining > 1 ? "s" : ""
+              }`;
+
+        return `<option value="${PizzaMan.escapeHtml(time)}" ${disabled ? "disabled" : ""} ${
+          time === selectedTime && selectedAvailable ? "selected" : ""
+        }>${PizzaMan.escapeHtml(label)}</option>`;
+      }),
     ].join("");
+
+    if (selectedTime && !selectedAvailable) {
+      setFeedback("Ce créneau n'a plus assez de place pour cette commande.");
+    }
+  }
+
+  function isTimeAvailableForCart(time, cartPizzaCount = PizzaMan.pizzaCount({ items: state.cart })) {
+    return PizzaMan.isValidOrderSlot(time) && PizzaMan.canFitInSlot(state.slotUsage, time, Math.max(1, cartPizzaCount));
+  }
+
+  async function refreshSlotUsage() {
+    try {
+      const usageRows = window.PizzaManDb ? await PizzaManDb.listSlotUsage(PizzaMan.todayServiceDate()) : [];
+      state.slotUsage = new Map(usageRows.map((row) => [row.slot, row.pizzaCount]));
+      state.slotUsageLoaded = true;
+      renderTimeSlots();
+      renderCart();
+    } catch (error) {
+      state.slotUsageLoaded = false;
+      setFeedback("Disponibilités indisponibles. Réessaie dans quelques secondes.");
+    }
   }
 
   function renderOpeningStatus() {
@@ -252,12 +291,19 @@
 
       if (removeButton) {
         state.cart.splice(Number(removeButton.dataset.removeItem), 1);
+        renderTimeSlots();
         renderCart();
       }
     });
 
-    customerForm.addEventListener("input", renderCart);
-    customerForm.addEventListener("change", renderCart);
+    customerForm.addEventListener("input", () => {
+      renderTimeSlots();
+      renderCart();
+    });
+    customerForm.addEventListener("change", () => {
+      renderTimeSlots();
+      renderCart();
+    });
     copyMessageButton.addEventListener("click", copyMessage);
     copyOrderLinkButton.addEventListener("click", copyPizzeriaLink);
     whatsappLink.addEventListener("click", (event) => sendMessageLink(event, "whatsapp"));
@@ -368,6 +414,7 @@
     }
 
     dialog.close();
+    renderTimeSlots();
     renderCart();
   }
 
@@ -469,9 +516,26 @@
       return null;
     }
 
+    await refreshSlotUsage();
+    if (!state.slotUsageLoaded) {
+      setFeedback("Disponibilités indisponibles. Réessaie dans quelques secondes.");
+      return null;
+    }
+
     const order = getCurrentOrder();
     if (order.customer.desiredTime && !PizzaMan.isValidOrderSlot(order.customer.desiredTime)) {
       setFeedback("Choisis une heure entre 17h00 et 21h30, par tranche de 15 minutes.");
+      return null;
+    }
+
+    if (!order.customer.desiredTime) {
+      setFeedback("Choisis une heure pour la commande.");
+      return null;
+    }
+
+    if (!PizzaMan.canFitInSlot(state.slotUsage, order.customer.desiredTime, PizzaMan.pizzaCount(order))) {
+      setFeedback("Ce créneau est complet ou n'a plus assez de place pour cette commande.");
+      renderTimeSlots();
       return null;
     }
 
@@ -487,6 +551,11 @@
       }
       return { order, stored: true };
     } catch (error) {
+      if (String(error && error.message).includes("Créneau complet")) {
+        await refreshSlotUsage();
+        setFeedback("Ce créneau vient d'être rempli. Choisis une autre heure.");
+        return null;
+      }
       setFeedback("Commande prête, mais l'enregistrement Supabase n'est pas encore disponible.");
     }
 

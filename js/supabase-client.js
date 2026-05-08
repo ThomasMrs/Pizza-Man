@@ -20,16 +20,25 @@
       items: order.items || [],
       total_amount: PizzaMan.orderTotal(order),
       delivery_charge: PizzaMan.deliveryCharge(order),
+      service_date: PizzaMan.orderServiceDate(order),
+      order_slot: PizzaMan.orderSlotValue(order) || null,
+      pizza_count: PizzaMan.pizzaCount(order),
       source,
     };
   }
 
   function fromRow(row) {
+    const customer = row.customer || {};
     return {
       id: row.id,
       createdAt: row.created_at,
       status: row.status || "À faire",
-      customer: row.customer || {},
+      customer: {
+        ...customer,
+        serviceDate: customer.serviceDate || row.service_date || PizzaMan.todayServiceDate(new Date(row.created_at)),
+        desiredTime: customer.desiredTime || (!customer.plannedTime ? row.order_slot || "" : ""),
+        plannedTime: customer.plannedTime || "",
+      },
       items: row.items || [],
     };
   }
@@ -70,6 +79,21 @@
     return { order, stored: error ? "existing" : "supabase" };
   }
 
+  async function listSlotUsage(serviceDate = PizzaMan.todayServiceDate()) {
+    if (!client) {
+      return Array.from(PizzaMan.slotUsageFromOrders(PizzaMan.loadOrders(), serviceDate).entries()).map(
+        ([slot, pizzaCount]) => ({ slot, pizzaCount }),
+      );
+    }
+
+    const { data, error } = await client.rpc("get_order_slot_usage", { service_date_arg: serviceDate });
+    if (error) throw error;
+    return (data || []).map((row) => ({
+      slot: row.slot_time,
+      pizzaCount: Number(row.pizza_count || 0),
+    }));
+  }
+
   async function upsertOrder(order, options = {}) {
     if (!client) throw new Error("Supabase n'est pas configuré.");
 
@@ -80,10 +104,14 @@
     return { order, stored: "supabase" };
   }
 
-  async function listOrders() {
+  async function listOrders(serviceDate = PizzaMan.todayServiceDate()) {
     if (!client) throw new Error("Supabase n'est pas configuré.");
 
-    const { data, error } = await client.from("orders").select("*").order("created_at", { ascending: false });
+    const { data, error } = await client
+      .from("orders")
+      .select("*")
+      .eq("service_date", serviceDate)
+      .order("created_at", { ascending: false });
     if (error) throw error;
     return data.map(fromRow);
   }
@@ -98,7 +126,15 @@
   async function updateOrderCustomer(id, customer) {
     if (!client) throw new Error("Supabase n'est pas configuré.");
 
-    const { error } = await client.from("orders").update({ customer }).eq("id", id);
+    const orderSlot = customer.plannedTime || customer.desiredTime || null;
+    const { error } = await client
+      .from("orders")
+      .update({
+        customer,
+        service_date: customer.serviceDate || PizzaMan.todayServiceDate(),
+        order_slot: PizzaMan.isValidOrderSlot(orderSlot) ? orderSlot : null,
+      })
+      .eq("id", id);
     if (error) throw error;
   }
 
@@ -116,6 +152,7 @@
     signIn,
     signOut,
     saveOrder,
+    listSlotUsage,
     upsertOrder,
     listOrders,
     updateOrderStatus,

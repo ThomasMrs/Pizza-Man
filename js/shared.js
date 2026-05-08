@@ -432,6 +432,39 @@
     return slots;
   }
 
+  function orderSlotValue(order) {
+    const time = orderTimeValue(order);
+    return isValidOrderSlot(time) ? time : "";
+  }
+
+  function slotUsageFromOrders(orders, serviceDate = todayServiceDate(), excludedOrderId = "") {
+    return (orders || []).reduce((usage, order) => {
+      if (!order || order.id === excludedOrderId || order.status === "Terminée") return usage;
+      if (orderServiceDate(order) !== serviceDate) return usage;
+
+      const slot = orderSlotValue(order);
+      if (!slot) return usage;
+
+      usage.set(slot, (usage.get(slot) || 0) + pizzaCount(order));
+      return usage;
+    }, new Map());
+  }
+
+  function slotPizzaCount(slotUsage, slot) {
+    if (!slotUsage) return 0;
+    if (slotUsage instanceof Map) return slotUsage.get(slot) || 0;
+    return Number(slotUsage[slot] || 0);
+  }
+
+  function slotRemaining(slotUsage, slot) {
+    return Math.max(0, business.pizzaCapacityPerSlot - slotPizzaCount(slotUsage, slot));
+  }
+
+  function canFitInSlot(slotUsage, slot, pizzaQuantity) {
+    if (!slot) return false;
+    return slotRemaining(slotUsage, slot) >= pizzaQuantity;
+  }
+
   function formatMoney(value) {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
@@ -702,6 +735,11 @@
     todayServiceDate,
     isValidOrderSlot,
     orderTimeSlots,
+    orderSlotValue,
+    slotUsageFromOrders,
+    slotPizzaCount,
+    slotRemaining,
+    canFitInSlot,
     orderTimeValue,
     orderServiceDate,
     formatTimeLabel,

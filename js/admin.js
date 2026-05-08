@@ -231,11 +231,25 @@
       return false;
     }
 
+    const slot = PizzaMan.orderSlotValue(order);
+    if (slot) {
+      const slotUsage = PizzaMan.slotUsageFromOrders(state.orders, PizzaMan.orderServiceDate(order), order.id);
+      if (!PizzaMan.canFitInSlot(slotUsage, slot, PizzaMan.pizzaCount(order))) {
+        setAdminFeedback("Ce créneau est complet ou n'a plus assez de place pour cette commande.");
+        return false;
+      }
+    }
+
     try {
       await PizzaManDb.upsertOrder(order, { source: "pizzeria" });
       setAdminFeedback("Commande ajoutée à la liste.");
       return true;
     } catch (error) {
+      if (String(error && error.message).includes("Créneau complet")) {
+        setAdminFeedback("Ce créneau vient d'être rempli. Choisis une autre heure.");
+        await renderOrders();
+        return false;
+      }
       setAdminFeedback("Ajout impossible dans Supabase. Vérifie la migration et la connexion Auth.");
     }
 
@@ -273,6 +287,14 @@
       return;
     }
 
+    const slotUsage = PizzaMan.slotUsageFromOrders(state.orders, PizzaMan.orderServiceDate(order), order.id);
+    if (plannedTime && !PizzaMan.canFitInSlot(slotUsage, plannedTime, PizzaMan.pizzaCount(order))) {
+      setAdminFeedback("Ce créneau est complet ou n'a plus assez de place pour cette commande.");
+      renderSchedule();
+      renderOrdersList();
+      return;
+    }
+
     const customer = { ...(order.customer || {}) };
     if (plannedTime) {
       customer.plannedTime = plannedTime;
@@ -288,6 +310,11 @@
       renderOrdersList();
       setAdminFeedback("Heure prévue mise à jour.");
     } catch (error) {
+      if (String(error && error.message).includes("Créneau complet")) {
+        setAdminFeedback("Ce créneau vient d'être rempli. Choisis une autre heure.");
+        await renderOrders();
+        return;
+      }
       setAdminFeedback("Modification de l'heure impossible.");
     }
   }
@@ -354,7 +381,7 @@
         <div class="schedule-time">
           <strong>${timeLabel}</strong>
           <select data-schedule-order="${orderId}" aria-label="Heure prévue ${orderId}">
-            ${renderTimeOptions(time)}
+            ${renderTimeOptions(order, time)}
           </select>
         </div>
         <div class="schedule-details">
@@ -424,7 +451,7 @@
           <label class="order-time-control">
             Heure prévue
             <select data-schedule-order="${orderId}">
-              ${renderTimeOptions(PizzaMan.orderTimeValue(order))}
+              ${renderTimeOptions(order, PizzaMan.orderTimeValue(order))}
             </select>
           </label>
           <button class="secondary-action" type="button" data-copy-order="${orderId}">
@@ -440,13 +467,26 @@
     `;
   }
 
-  function renderTimeOptions(selectedTime) {
+  function renderTimeOptions(order, selectedTime) {
     const selected = String(selectedTime || "");
+    const slotUsage = PizzaMan.slotUsageFromOrders(state.orders, PizzaMan.orderServiceDate(order), order.id);
+    const orderPizzaCount = PizzaMan.pizzaCount(order);
+
     return [
       `<option value="" ${selected ? "" : "selected"}>Non définie</option>`,
       ...PizzaMan.orderTimeSlots().map((time) => {
         const escapedTime = PizzaMan.escapeHtml(time);
-        return `<option value="${escapedTime}" ${time === selected ? "selected" : ""}>${PizzaMan.formatTimeLabel(time)}</option>`;
+        const remaining = PizzaMan.slotRemaining(slotUsage, time);
+        const disabled = time !== selected && remaining < orderPizzaCount;
+        const label =
+          remaining <= 0
+            ? `${PizzaMan.formatTimeLabel(time)} - complet`
+            : `${PizzaMan.formatTimeLabel(time)} - ${remaining} pizza${remaining > 1 ? "s" : ""} restante${
+                remaining > 1 ? "s" : ""
+              }`;
+        return `<option value="${escapedTime}" ${time === selected ? "selected" : ""} ${
+          disabled ? "disabled" : ""
+        }>${PizzaMan.escapeHtml(label)}</option>`;
       }),
     ].join("");
   }
