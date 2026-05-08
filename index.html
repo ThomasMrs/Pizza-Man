@@ -114,8 +114,9 @@
             <p class="option-note" id="delivery-minimum-warning" role="alert" hidden></p>
             <label>
               Heure souhaitée
-              <input name="desiredTime" type="time" />
+              <select name="desiredTime" id="desired-time" required></select>
             </label>
+            <p class="option-note" id="slot-availability-note" role="status" aria-live="polite"></p>
             <label>
               Adresse ou précision
               <textarea

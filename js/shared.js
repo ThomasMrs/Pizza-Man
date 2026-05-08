@@ -14,6 +14,10 @@
     deliveryFee: 4,
     deliveryMinimum: 2,
     maxExtrasPerPizza: 3,
+    orderStartTime: "17:00",
+    orderEndTime: "21:30",
+    orderSlotMinutes: 15,
+    pizzaCapacityPerSlot: 8,
     deliveryNote: "Livraison à partir de 2 pizzas, pas de pizza offerte en livraison.",
     allergenNote: "Liste des allergènes disponible sur demande.",
   };
@@ -386,6 +390,48 @@
     return `PM-${compactDate}`;
   }
 
+  function padTimePart(value) {
+    return String(value).padStart(2, "0");
+  }
+
+  function todayServiceDate(date = new Date()) {
+    return [
+      date.getFullYear(),
+      padTimePart(date.getMonth() + 1),
+      padTimePart(date.getDate()),
+    ].join("-");
+  }
+
+  function timeToMinutes(time) {
+    const [hours, minutes] = String(time || "").split(":").map(Number);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+    return hours * 60 + minutes;
+  }
+
+  function minutesToTime(minutes) {
+    return `${padTimePart(Math.floor(minutes / 60))}:${padTimePart(minutes % 60)}`;
+  }
+
+  function isValidOrderSlot(time) {
+    const value = timeToMinutes(time);
+    const start = timeToMinutes(business.orderStartTime);
+    const end = timeToMinutes(business.orderEndTime);
+    if (value === null || start === null || end === null) return false;
+    return value >= start && value <= end && value % business.orderSlotMinutes === 0;
+  }
+
+  function orderTimeSlots() {
+    const start = timeToMinutes(business.orderStartTime);
+    const end = timeToMinutes(business.orderEndTime);
+    if (start === null || end === null) return [];
+
+    const slots = [];
+    for (let minutes = start; minutes <= end; minutes += business.orderSlotMinutes) {
+      slots.push(minutesToTime(minutes));
+    }
+    return slots;
+  }
+
   function formatMoney(value) {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
@@ -494,6 +540,11 @@
     return customer.plannedTime || customer.desiredTime || "";
   }
 
+  function orderServiceDate(order) {
+    const customer = order.customer || {};
+    return customer.serviceDate || todayServiceDate();
+  }
+
   function formatTimeLabel(time) {
     if (!time) return "Heure non définie";
     const parts = String(time).split(":");
@@ -554,6 +605,7 @@
         address: customer.address || "",
         desiredTime: customer.desiredTime || "",
         plannedTime: customer.plannedTime || "",
+        serviceDate: customer.serviceDate || todayServiceDate(now),
       },
       items: cart.map((item) => ({
         ...item,
@@ -647,7 +699,11 @@
     itemsSubtotal,
     pizzaCount,
     articleCount,
+    todayServiceDate,
+    isValidOrderSlot,
+    orderTimeSlots,
     orderTimeValue,
+    orderServiceDate,
     formatTimeLabel,
     deliveryCharge,
     deliveryMinimumWarning,

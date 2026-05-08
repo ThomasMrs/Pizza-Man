@@ -7,6 +7,9 @@
     selectedExtras: new Set(),
     quantity: 1,
     orderMeta: null,
+    slotUsage: new Map(),
+    availabilityLoaded: false,
+    availabilityError: false,
   };
 
   const menuGrid = document.querySelector("#menu-grid");
@@ -15,6 +18,8 @@
   const cartTotal = document.querySelector("#cart-total");
   const cartCount = document.querySelector("#cart-count");
   const customerForm = document.querySelector("#customer-form");
+  const desiredTimeSelect = document.querySelector("#desired-time");
+  const slotAvailabilityNote = document.querySelector("#slot-availability-note");
   const messageOutput = document.querySelector("#message-output");
   const copyMessageButton = document.querySelector("#copy-message");
   const copyOrderLinkButton = document.querySelector("#copy-order-link");
@@ -43,9 +48,11 @@
 
   function init() {
     renderMenu();
+    renderTimeSlots();
     renderCart();
     bindEvents();
     setupMobileCartVisibility();
+    refreshSlotAvailability();
     refreshIcons();
   }
 
@@ -222,6 +229,7 @@
     });
 
     customerForm.addEventListener("input", renderCart);
+    customerForm.addEventListener("change", renderCart);
     copyMessageButton.addEventListener("click", copyMessage);
     copyOrderLinkButton.addEventListener("click", copyPizzeriaLink);
     whatsappLink.addEventListener("click", (event) => sendMessageLink(event, "whatsapp"));
