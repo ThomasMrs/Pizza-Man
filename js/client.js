@@ -23,6 +23,7 @@
   const openingStatus = document.querySelector("#opening-status");
   const openingStatusLabel = document.querySelector("#opening-status-label");
   const messageOutput = document.querySelector("#message-output");
+  const orderButton = document.querySelector("#order-button");
   const copyMessageButton = document.querySelector("#copy-message");
   const copyOrderLinkButton = document.querySelector("#copy-order-link");
   const whatsappLink = document.querySelector("#whatsapp-link");
@@ -322,10 +323,11 @@
       renderTimeSlots();
       renderCart();
     });
-    copyMessageButton.addEventListener("click", copyMessage);
-    copyOrderLinkButton.addEventListener("click", copyPizzeriaLink);
-    whatsappLink.addEventListener("click", (event) => sendMessageLink(event, "whatsapp"));
-    smsLink.addEventListener("click", (event) => sendMessageLink(event, "sms"));
+    orderButton.addEventListener("click", orderWithWhatsApp);
+    copyMessageButton?.addEventListener("click", copyMessage);
+    copyOrderLinkButton?.addEventListener("click", copyPizzeriaLink);
+    whatsappLink?.addEventListener("click", (event) => sendMessageLink(event, "whatsapp"));
+    smsLink?.addEventListener("click", (event) => sendMessageLink(event, "sms"));
 
     mobileCartJump.addEventListener("click", () => {
       document.querySelector("#commande").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -517,9 +519,14 @@
     deliveryMinimumWarning.hidden = !deliveryWarning;
 
     const encodedMessage = encodeURIComponent(messageOutput.value);
-    whatsappLink.href =
-      state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.whatsappHref}?text=${encodedMessage}` : "#";
-    smsLink.href = state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.smsHref}?&body=${encodedMessage}` : "#";
+    if (whatsappLink) {
+      whatsappLink.href =
+        state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.whatsappHref}?text=${encodedMessage}` : "#";
+    }
+    if (smsLink) {
+      smsLink.href =
+        state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.smsHref}?&body=${encodedMessage}` : "#";
+    }
     const articleCount = PizzaMan.articleCount(order);
     cartCount.textContent = `${articleCount} article${articleCount > 1 ? "s" : ""}`;
     mobileCartLabel.textContent =
@@ -608,6 +615,28 @@
       link,
       result.stored ? "Lien pizzeria copié et commande enregistrée." : "Lien pizzeria copié. Supabase à vérifier.",
     );
+  }
+
+  async function orderWithWhatsApp() {
+    if (!state.cart.length) {
+      setFeedback("Ajoute au moins un article avant d'envoyer la commande.");
+      return;
+    }
+
+    const popup = window.open("about:blank", "_blank", "noreferrer");
+    const result = await persistCurrentOrder();
+    if (!result) {
+      if (popup) popup.close();
+      return;
+    }
+
+    const href = `${PizzaMan.business.whatsappHref}?text=${encodeURIComponent(messageOutput.value)}`;
+    if (popup) {
+      popup.location.href = href;
+      return;
+    }
+
+    window.location.href = href;
   }
 
   async function sendMessageLink(event, target) {
