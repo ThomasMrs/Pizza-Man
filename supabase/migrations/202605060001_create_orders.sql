@@ -130,14 +130,18 @@ declare
   usage_slot text;
 begin
   for stored_order in
-    select id, order_slot, pizza_count, created_at
-    from public.orders
-    where service_date = service_date_arg
-      and status <> 'Terminée'
-      and order_slot is not null
-      and pizza_count > 0
-      and (excluded_order_id_arg is null or id <> excluded_order_id_arg)
-    order by created_at, id
+    select
+      stored_orders.id,
+      stored_orders.order_slot,
+      stored_orders.pizza_count,
+      stored_orders.created_at
+    from public.orders as stored_orders
+    where stored_orders.service_date = service_date_arg
+      and stored_orders.status <> 'Terminée'
+      and stored_orders.order_slot is not null
+      and stored_orders.pizza_count > 0
+      and (excluded_order_id_arg is null or stored_orders.id <> excluded_order_id_arg)
+    order by stored_orders.created_at, stored_orders.id
   loop
     if not public.is_valid_order_slot(stored_order.order_slot) then
       continue;
