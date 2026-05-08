@@ -17,6 +17,8 @@
   const cartTotal = document.querySelector("#cart-total");
   const cartCount = document.querySelector("#cart-count");
   const customerForm = document.querySelector("#customer-form");
+  const modeSelect = customerForm.querySelector("select[name='mode']");
+  const addressField = document.querySelector("#address-field");
   const desiredTimeSelect = document.querySelector("#desired-time");
   const openingStatus = document.querySelector("#opening-status");
   const openingStatusLabel = document.querySelector("#opening-status-label");
@@ -49,6 +51,7 @@
   function init() {
     renderMenu();
     renderTimeSlots();
+    updateCustomerRequirements();
     renderOpeningStatus();
     renderCart();
     bindEvents();
@@ -62,6 +65,16 @@
     if (window.lucide) {
       window.lucide.createIcons();
     }
+  }
+
+  function updateCustomerRequirements() {
+    if (!modeSelect || !addressField) return;
+
+    const deliverySelected = modeSelect.value === "Livraison";
+    addressField.required = deliverySelected;
+    addressField.placeholder = deliverySelected
+      ? "Adresse complète, code porte, étage..."
+      : "Précision facultative...";
   }
 
   function renderTimeSlots() {
@@ -106,8 +119,10 @@
       renderTimeSlots();
       renderCart();
     } catch (error) {
-      state.slotUsageLoaded = false;
-      setFeedback("Disponibilités indisponibles. Réessaie dans quelques secondes.");
+      state.slotUsage = new Map();
+      state.slotUsageLoaded = true;
+      renderTimeSlots();
+      renderCart();
     }
   }
 
@@ -126,7 +141,9 @@
 
     openingStatus.classList.toggle("is-open", isOpen);
     openingStatus.classList.toggle("is-closed", !isOpen);
-    openingStatusLabel.textContent = isOpen ? "Ouvert - jusqu'à 21h30" : "Fermé - mardi au samedi 17h à 21h30";
+    openingStatusLabel.textContent = isOpen
+      ? "Ouvert - jusqu'à 21h30"
+      : "Fermé - commandes possibles pour 17h à 21h30";
   }
 
   function renderMenu() {
@@ -301,6 +318,7 @@
       renderCart();
     });
     customerForm.addEventListener("change", () => {
+      updateCustomerRequirements();
       renderTimeSlots();
       renderCart();
     });
@@ -516,11 +534,13 @@
       return null;
     }
 
-    await refreshSlotUsage();
-    if (!state.slotUsageLoaded) {
-      setFeedback("Disponibilités indisponibles. Réessaie dans quelques secondes.");
+    updateCustomerRequirements();
+    if (!customerForm.reportValidity()) {
+      setFeedback("Renseigne les champs obligatoires avant d'envoyer la commande.");
       return null;
     }
+
+    await refreshSlotUsage();
 
     const order = getCurrentOrder();
     if (order.customer.desiredTime && !PizzaMan.isValidOrderSlot(order.customer.desiredTime)) {

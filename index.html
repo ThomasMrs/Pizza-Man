@@ -93,7 +93,7 @@
           <form class="customer-form" id="customer-form">
             <label>
               Nom
-              <input name="name" autocomplete="name" placeholder="Ex: Thomas" />
+              <input name="name" autocomplete="name" placeholder="Ex: Thomas" required />
             </label>
             <label>
               Téléphone
@@ -102,11 +102,12 @@
                 autocomplete="tel"
                 inputmode="tel"
                 placeholder="Ex: 06 12 34 56 78"
+                required
               />
             </label>
             <label>
               Mode de commande
-              <select name="mode">
+              <select name="mode" required>
                 <option value="À emporter">À emporter</option>
                 <option value="Livraison">Livraison (+4 EUR)</option>
               </select>
@@ -114,12 +115,13 @@
             <p class="option-note" id="delivery-minimum-warning" role="alert" hidden></p>
             <label>
               Heure souhaitée
-              <select name="desiredTime" id="desired-time"></select>
+              <select name="desiredTime" id="desired-time" required></select>
             </label>
             <label>
               Adresse ou précision
               <textarea
                 name="address"
+                id="address-field"
                 rows="3"
                 placeholder="Adresse, heure souhaitée, code porte..."
               ></textarea>
