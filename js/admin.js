@@ -477,13 +477,23 @@
       ...PizzaMan.orderTimeSlots().map((time) => {
         const escapedTime = PizzaMan.escapeHtml(time);
         const remaining = PizzaMan.slotRemaining(slotUsage, time);
-        const disabled = time !== selected && remaining < orderPizzaCount;
-        const label =
+        const plan = PizzaMan.slotPlanForPizzaCount(slotUsage, time, orderPizzaCount);
+        const disabled = time !== selected && !plan.canFit;
+        let label =
           remaining <= 0
             ? `${PizzaMan.formatTimeLabel(time)} - complet`
             : `${PizzaMan.formatTimeLabel(time)} - ${remaining} pizza${remaining > 1 ? "s" : ""} restante${
                 remaining > 1 ? "s" : ""
               }`;
+
+        if (orderPizzaCount > PizzaMan.business.pizzaCapacityPerSlot) {
+          label = plan.canFit
+            ? `${PizzaMan.formatTimeLabel(time)} - OK sur ${plan.slots.length} créneaux`
+            : `${PizzaMan.formatTimeLabel(time)} - pas assez de place`;
+        } else if (orderPizzaCount > 0 && !plan.canFit && remaining > 0) {
+          label = `${PizzaMan.formatTimeLabel(time)} - pas assez de place`;
+        }
+
         return `<option value="${escapedTime}" ${time === selected ? "selected" : ""} ${
           disabled ? "disabled" : ""
         }>${PizzaMan.escapeHtml(label)}</option>`;

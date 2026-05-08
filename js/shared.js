@@ -438,14 +438,29 @@
   }
 
   function slotUsageFromOrders(orders, serviceDate = todayServiceDate(), excludedOrderId = "") {
-    return (orders || []).reduce((usage, order) => {
+    const orderedOrders = (orders || [])
+      .map((order, index) => ({ order, index }))
+      .sort((left, right) => {
+        const leftTime = Date.parse(left.order && left.order.createdAt ? left.order.createdAt : "");
+        const rightTime = Date.parse(right.order && right.order.createdAt ? right.order.createdAt : "");
+        if (!Number.isNaN(leftTime) && !Number.isNaN(rightTime) && leftTime !== rightTime) return leftTime - rightTime;
+        if (!Number.isNaN(leftTime) && Number.isNaN(rightTime)) return -1;
+        if (Number.isNaN(leftTime) && !Number.isNaN(rightTime)) return 1;
+        return left.index - right.index;
+      })
+      .map(({ order }) => order);
+
+    return orderedOrders.reduce((usage, order) => {
       if (!order || order.id === excludedOrderId || order.status === "Terminée") return usage;
       if (orderServiceDate(order) !== serviceDate) return usage;
 
       const slot = orderSlotValue(order);
       if (!slot) return usage;
 
-      usage.set(slot, (usage.get(slot) || 0) + pizzaCount(order));
+      slotPlanForPizzaCount(usage, slot, pizzaCount(order)).slots.forEach((plannedSlot) => {
+        usage.set(plannedSlot.slot, (usage.get(plannedSlot.slot) || 0) + plannedSlot.pizzaCount);
+      });
+
       return usage;
     }, new Map());
   }
@@ -460,9 +475,46 @@
     return Math.max(0, business.pizzaCapacityPerSlot - slotPizzaCount(slotUsage, slot));
   }
 
+  function slotPlanForPizzaCount(slotUsage, slot, pizzaQuantity) {
+    if (!isValidOrderSlot(slot)) {
+      return { canFit: false, slots: [], remainingPizzas: Math.max(0, Number(pizzaQuantity) || 0) };
+    }
+
+    const quantity = Math.max(0, Number(pizzaQuantity) || 0);
+    if (quantity === 0) {
+      return { canFit: true, slots: [], remainingPizzas: 0 };
+    }
+
+    const slots = orderTimeSlots();
+    const startIndex = slots.indexOf(slot);
+    if (startIndex === -1) {
+      return { canFit: false, slots: [], remainingPizzas: quantity };
+    }
+
+    let remainingPizzas = quantity;
+    const plannedSlots = [];
+
+    for (let index = startIndex; index < slots.length && remainingPizzas > 0; index += 1) {
+      const currentSlot = slots[index];
+      const available = slotRemaining(slotUsage, currentSlot);
+      if (available <= 0) break;
+
+      const pizzaCountForSlot = Math.min(available, remainingPizzas);
+      plannedSlots.push({ slot: currentSlot, pizzaCount: pizzaCountForSlot });
+      remainingPizzas -= pizzaCountForSlot;
+    }
+
+    return {
+      canFit: remainingPizzas === 0,
+      slots: plannedSlots,
+      remainingPizzas,
+      endSlot: plannedSlots.length ? plannedSlots[plannedSlots.length - 1].slot : "",
+    };
+  }
+
   function canFitInSlot(slotUsage, slot, pizzaQuantity) {
     if (!slot) return false;
-    return slotRemaining(slotUsage, slot) >= pizzaQuantity;
+    return slotPlanForPizzaCount(slotUsage, slot, pizzaQuantity).canFit;
   }
 
   function formatMoney(value) {
@@ -739,6 +791,7 @@
     slotUsageFromOrders,
     slotPizzaCount,
     slotRemaining,
+    slotPlanForPizzaCount,
     canFitInSlot,
     orderTimeValue,
     orderServiceDate,

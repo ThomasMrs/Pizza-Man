@@ -111,6 +111,70 @@ before update on public.orders
 for each row
 execute function public.set_updated_at();
 
+create or replace function public.calculate_order_slot_usage(service_date_arg date, excluded_order_id_arg text default null)
+returns table(slot_time text, pizza_count integer)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  usage jsonb := '{}'::jsonb;
+  stored_order record;
+  current_minutes integer;
+  end_minutes integer := (21 * 60 + 30);
+  remaining_pizzas integer;
+  used_at_slot integer;
+  available_pizzas integer;
+  planned_pizzas integer;
+  usage_slot text;
+begin
+  for stored_order in
+    select id, order_slot, pizza_count, created_at
+    from public.orders
+    where service_date = service_date_arg
+      and status <> 'Terminée'
+      and order_slot is not null
+      and pizza_count > 0
+      and (excluded_order_id_arg is null or id <> excluded_order_id_arg)
+    order by created_at, id
+  loop
+    if not public.is_valid_order_slot(stored_order.order_slot) then
+      continue;
+    end if;
+
+    current_minutes := split_part(stored_order.order_slot, ':', 1)::integer * 60
+      + split_part(stored_order.order_slot, ':', 2)::integer;
+    remaining_pizzas := stored_order.pizza_count;
+
+    while remaining_pizzas > 0 and current_minutes <= end_minutes loop
+      usage_slot := lpad((current_minutes / 60)::text, 2, '0')
+        || ':'
+        || lpad((current_minutes % 60)::text, 2, '0');
+      used_at_slot := coalesce((usage ->> usage_slot)::integer, 0);
+      available_pizzas := greatest(0, 8 - used_at_slot);
+
+      exit when available_pizzas <= 0;
+
+      planned_pizzas := least(available_pizzas, remaining_pizzas);
+      usage := jsonb_set(usage, array[usage_slot], to_jsonb(used_at_slot + planned_pizzas), true);
+      remaining_pizzas := remaining_pizzas - planned_pizzas;
+      current_minutes := current_minutes + 15;
+    end loop;
+  end loop;
+
+  for usage_slot in
+    select usage_key
+    from jsonb_object_keys(usage) as keys(usage_key)
+    order by usage_key
+  loop
+    slot_time := usage_slot;
+    pizza_count := (usage ->> usage_slot)::integer;
+    return next;
+  end loop;
+end;
+$$;
+
 create or replace function public.enforce_order_slot_capacity()
 returns trigger
 language plpgsql
@@ -118,7 +182,15 @@ security definer
 set search_path = public
 as $$
 declare
+  used_slots jsonb := '{}'::jsonb;
+  usage_row record;
+  current_minutes integer;
+  end_minutes integer := (21 * 60 + 30);
+  remaining_pizzas integer;
   used_pizzas integer;
+  available_pizzas integer;
+  planned_pizzas integer;
+  usage_slot text;
 begin
   if new.service_date is null then
     new.service_date := case
@@ -138,15 +210,35 @@ begin
   new.pizza_count := public.calculate_order_pizza_count(new.items);
 
   if new.status <> 'Terminée' and new.order_slot is not null and new.pizza_count > 0 then
-    select coalesce(sum(orders.pizza_count), 0)::integer
-    into used_pizzas
-    from public.orders
-    where orders.id <> new.id
-      and orders.status <> 'Terminée'
-      and orders.service_date = new.service_date
-      and orders.order_slot = new.order_slot;
+    for usage_row in
+      select * from public.calculate_order_slot_usage(new.service_date, new.id)
+    loop
+      used_slots := jsonb_set(used_slots, array[usage_row.slot_time], to_jsonb(usage_row.pizza_count), true);
+    end loop;
 
-    if used_pizzas + new.pizza_count > 8 then
+    if coalesce((used_slots ->> new.order_slot)::integer, 0) >= 8 then
+      raise exception 'Créneau complet: maximum 8 pizzas par tranche de 15 minutes.';
+    end if;
+
+    current_minutes := split_part(new.order_slot, ':', 1)::integer * 60
+      + split_part(new.order_slot, ':', 2)::integer;
+    remaining_pizzas := new.pizza_count;
+
+    while remaining_pizzas > 0 and current_minutes <= end_minutes loop
+      usage_slot := lpad((current_minutes / 60)::text, 2, '0')
+        || ':'
+        || lpad((current_minutes % 60)::text, 2, '0');
+      used_pizzas := coalesce((used_slots ->> usage_slot)::integer, 0);
+      available_pizzas := greatest(0, 8 - used_pizzas);
+
+      exit when available_pizzas <= 0;
+
+      planned_pizzas := least(available_pizzas, remaining_pizzas);
+      remaining_pizzas := remaining_pizzas - planned_pizzas;
+      current_minutes := current_minutes + 15;
+    end loop;
+
+    if remaining_pizzas > 0 then
       raise exception 'Créneau complet: maximum 8 pizzas par tranche de 15 minutes.';
     end if;
   end if;
@@ -168,13 +260,9 @@ stable
 security definer
 set search_path = public
 as $$
-  select orders.order_slot as slot_time, coalesce(sum(orders.pizza_count), 0)::integer as pizza_count
-  from public.orders
-  where orders.service_date = service_date_arg
-    and orders.status <> 'Terminée'
-    and orders.order_slot is not null
-  group by orders.order_slot
-  order by orders.order_slot;
+  select usage.slot_time, usage.pizza_count
+  from public.calculate_order_slot_usage(service_date_arg) as usage
+  order by usage.slot_time;
 $$;
 
 alter table public.orders enable row level security;
@@ -182,6 +270,7 @@ alter table public.orders enable row level security;
 grant usage on schema public to anon, authenticated;
 grant insert on public.orders to anon;
 grant select, insert, update, delete on public.orders to authenticated;
+grant execute on function public.calculate_order_slot_usage(date, text) to anon, authenticated;
 grant execute on function public.get_order_slot_usage(date) to anon, authenticated;
 
 drop policy if exists "Clients can create orders" on public.orders;

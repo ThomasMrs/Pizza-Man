@@ -84,18 +84,28 @@
     const selectedTime = desiredTimeSelect.value;
     const cartPizzaCount = PizzaMan.pizzaCount({ items: state.cart });
     const selectedAvailable = !selectedTime || isTimeAvailableForCart(selectedTime, cartPizzaCount);
+    const requestedPizzaCount = Math.max(1, cartPizzaCount);
 
     desiredTimeSelect.innerHTML = [
       '<option value="">Choisir une heure</option>',
       ...PizzaMan.orderTimeSlots().map((time) => {
         const remaining = PizzaMan.slotRemaining(state.slotUsage, time);
-        const disabled = remaining <= 0 || (cartPizzaCount > 0 && remaining < cartPizzaCount);
-        const label =
+        const plan = PizzaMan.slotPlanForPizzaCount(state.slotUsage, time, requestedPizzaCount);
+        const disabled = !plan.canFit;
+        let label =
           remaining <= 0
             ? `${PizzaMan.formatTimeLabel(time)} - complet`
             : `${PizzaMan.formatTimeLabel(time)} - ${remaining} pizza${remaining > 1 ? "s" : ""} restante${
                 remaining > 1 ? "s" : ""
               }`;
+
+        if (cartPizzaCount > PizzaMan.business.pizzaCapacityPerSlot) {
+          label = plan.canFit
+            ? `${PizzaMan.formatTimeLabel(time)} - OK sur ${plan.slots.length} créneaux`
+            : `${PizzaMan.formatTimeLabel(time)} - pas assez de place`;
+        } else if (cartPizzaCount > 0 && !plan.canFit && remaining > 0) {
+          label = `${PizzaMan.formatTimeLabel(time)} - pas assez de place`;
+        }
 
         return `<option value="${PizzaMan.escapeHtml(time)}" ${disabled ? "disabled" : ""} ${
           time === selectedTime && selectedAvailable ? "selected" : ""
