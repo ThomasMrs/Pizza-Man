@@ -333,7 +333,7 @@
       renderTimeSlots();
       renderCart();
     });
-    orderButton.addEventListener("click", orderWithWhatsApp);
+    orderButton.addEventListener("click", orderWithSms);
     copyMessageButton?.addEventListener("click", copyMessage);
     copyOrderLinkButton?.addEventListener("click", copyPizzeriaLink);
     whatsappLink?.addEventListener("click", (event) => sendMessageLink(event, "whatsapp"));
@@ -346,16 +346,24 @@
 
   function setupMobileCartVisibility() {
     const cartPanel = document.querySelector("#commande");
-    if (!cartPanel || !("IntersectionObserver" in window)) return;
+    if (!cartPanel || !mobileCartJump) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        mobileCartJump.classList.toggle("is-hidden", Boolean(entry && entry.isIntersecting));
-      },
-      { threshold: 0.2 },
-    );
+    updateMobileCartJumpVisibility();
+    window.addEventListener("scroll", updateMobileCartJumpVisibility, { passive: true });
+    window.addEventListener("resize", updateMobileCartJumpVisibility);
+    cartPanel.addEventListener("focusin", () => mobileCartJump.classList.add("is-hidden"));
+    cartPanel.addEventListener("pointerdown", () => mobileCartJump.classList.add("is-hidden"));
+  }
 
-    observer.observe(cartPanel);
+  function updateMobileCartJumpVisibility() {
+    const cartPanel = document.querySelector("#commande");
+    if (!cartPanel || !mobileCartJump) return;
+
+    const isMobile = window.matchMedia("(max-width: 720px)").matches;
+    const rect = cartPanel.getBoundingClientRect();
+    const cartVisible = rect.top < window.innerHeight - 64 && rect.bottom > 96;
+    const shouldHide = !isMobile || !state.cart.length || cartVisible;
+    mobileCartJump.classList.toggle("is-hidden", shouldHide);
   }
 
   function openDialog(pizzaId, editingIndex = null) {
@@ -534,14 +542,14 @@
         state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.whatsappHref}?text=${encodedMessage}` : "#";
     }
     if (smsLink) {
-      smsLink.href =
-        state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.smsHref}?&body=${encodedMessage}` : "#";
+      smsLink.href = state.cart.length > 0 && !deliveryWarning ? buildSmsHref(messageOutput.value) : "#";
     }
     const articleCount = PizzaMan.articleCount(order);
     cartCount.textContent = `${articleCount} article${articleCount > 1 ? "s" : ""}`;
     mobileCartLabel.textContent =
       articleCount > 0 ? `${articleCount} article(s) - ${PizzaMan.formatMoney(total)}` : "Voir la commande";
 
+    updateMobileCartJumpVisibility();
     refreshIcons();
   }
 
@@ -627,26 +635,26 @@
     );
   }
 
-  async function orderWithWhatsApp() {
+  function buildSmsHref(message) {
+    const userAgent = navigator.userAgent || "";
+    const isAppleMobile =
+      /iPad|iPhone|iPod/.test(userAgent) || (/Macintosh/.test(userAgent) && navigator.maxTouchPoints > 1);
+    const separator = isAppleMobile ? "&" : "?";
+    return `${PizzaMan.business.smsHref}${separator}body=${encodeURIComponent(message)}`;
+  }
+
+  async function orderWithSms() {
     if (!state.cart.length) {
       setFeedback("Ajoute au moins un article avant d'envoyer la commande.");
       return;
     }
 
-    const popup = window.open("about:blank", "_blank", "noreferrer");
     const result = await persistCurrentOrder();
     if (!result) {
-      if (popup) popup.close();
       return;
     }
 
-    const href = `${PizzaMan.business.whatsappHref}?text=${encodeURIComponent(messageOutput.value)}`;
-    if (popup) {
-      popup.location.href = href;
-      return;
-    }
-
-    window.location.href = href;
+    window.location.href = buildSmsHref(messageOutput.value);
   }
 
   async function sendMessageLink(event, target) {

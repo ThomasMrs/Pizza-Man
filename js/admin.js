@@ -164,8 +164,8 @@
     workspace.hidden = !authenticated;
 
     if (authenticated) {
-      renderImportPanel();
       await renderOrders();
+      renderImportPanel();
     }
   }
 
@@ -184,6 +184,15 @@
   function parseOrderFromText(text) {
     const value = text.trim();
     if (!value) return null;
+
+    const orderParamMatch = value.match(/[?&]order=([A-Za-z0-9_-]+)/);
+    if (orderParamMatch) {
+      try {
+        return PizzaMan.decodeOrder(orderParamMatch[1]);
+      } catch (error) {
+        return null;
+      }
+    }
 
     try {
       const url = new URL(value, window.location.href);
@@ -225,6 +234,12 @@
   }
 
   async function addOrder(order) {
+    if (state.orders.some((storedOrder) => storedOrder.id === order.id)) {
+      setAdminFeedback("Commande déjà dans la liste.");
+      clearOrderFromUrl();
+      return true;
+    }
+
     const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
     if (deliveryWarning) {
       setAdminFeedback(deliveryWarning);
@@ -241,7 +256,8 @@
     }
 
     try {
-      await PizzaManDb.upsertOrder(order, { source: "pizzeria" });
+      await PizzaManDb.saveOrder(order, { source: "pizzeria" });
+      clearOrderFromUrl();
       setAdminFeedback("Commande ajoutée à la liste.");
       return true;
     } catch (error) {
@@ -250,7 +266,11 @@
         await renderOrders();
         return false;
       }
-      setAdminFeedback("Ajout impossible dans Supabase. Vérifie la migration et la connexion Auth.");
+      setAdminFeedback(
+        `Ajout impossible dans Supabase: ${
+          error && error.message ? error.message : "vérifie la migration et la connexion Auth."
+        }`,
+      );
     }
 
     return false;
@@ -329,8 +349,21 @@
 
   async function renderOrders() {
     state.orders = await loadOrders();
+    if (state.pendingImport && state.orders.some((order) => order.id === state.pendingImport.id)) {
+      state.pendingImport = null;
+      clearOrderFromUrl();
+      setAdminFeedback("Commande déjà enregistrée dans la liste.");
+    }
     renderSchedule();
     renderOrdersList();
+  }
+
+  function clearOrderFromUrl() {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("order")) return;
+
+    url.searchParams.delete("order");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
   function renderOrdersList() {

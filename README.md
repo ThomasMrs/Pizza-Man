@@ -55,12 +55,9 @@ suppléments et peut préciser une modification. Le site calcule aussi :
 - modification : `0,50 EUR` ;
 - frais de livraison : `4 EUR` si le client choisit la livraison.
 
-Le site génère ensuite :
-
-- un message à copier ;
-- un lien WhatsApp ;
-- un lien SMS ;
-- un lien pizzeria.
+Le site génère ensuite une commande par SMS. Le message contient aussi un lien
+pizzeria de secours pour retrouver la commande si l'enregistrement Supabase
+n'est pas encore disponible.
 
 Le client peut renseigner une heure souhaitée. Côté pizzeria, le planning des
 commandes affiche les commandes actives et permet d'ajuster l'heure prévue.
