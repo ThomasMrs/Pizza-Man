@@ -15,6 +15,7 @@
   const cartTotal = document.querySelector("#cart-total");
   const cartCount = document.querySelector("#cart-count");
   const customerForm = document.querySelector("#customer-form");
+  const desiredTimeSelect = document.querySelector("#desired-time");
   const openingStatus = document.querySelector("#opening-status");
   const openingStatusLabel = document.querySelector("#opening-status-label");
   const messageOutput = document.querySelector("#message-output");
@@ -45,6 +46,7 @@
 
   function init() {
     renderMenu();
+    renderTimeSlots();
     renderOpeningStatus();
     renderCart();
     bindEvents();
@@ -57,6 +59,17 @@
     if (window.lucide) {
       window.lucide.createIcons();
     }
+  }
+
+  function renderTimeSlots() {
+    if (!desiredTimeSelect) return;
+
+    desiredTimeSelect.innerHTML = [
+      '<option value="">Choisir une heure</option>',
+      ...PizzaMan.orderTimeSlots().map(
+        (time) => `<option value="${PizzaMan.escapeHtml(time)}">${PizzaMan.formatTimeLabel(time)}</option>`,
+      ),
+    ].join("");
   }
 
   function renderOpeningStatus() {
@@ -457,6 +470,11 @@
     }
 
     const order = getCurrentOrder();
+    if (order.customer.desiredTime && !PizzaMan.isValidOrderSlot(order.customer.desiredTime)) {
+      setFeedback("Choisis une heure entre 17h00 et 21h30, par tranche de 15 minutes.");
+      return null;
+    }
+
     const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
     if (deliveryWarning) {
       setFeedback(deliveryWarning);

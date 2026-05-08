@@ -129,7 +129,7 @@
 
     ordersList.addEventListener("change", async (event) => {
       const select = event.target.closest("select[data-status-order]");
-      const scheduleInput = event.target.closest("input[data-schedule-order]");
+      const scheduleInput = event.target.closest("[data-schedule-order]");
 
       if (select) {
         await updateOrderStatus(select.dataset.statusOrder, select.value);
@@ -142,7 +142,7 @@
     });
 
     scheduleList.addEventListener("change", async (event) => {
-      const scheduleInput = event.target.closest("input[data-schedule-order]");
+      const scheduleInput = event.target.closest("[data-schedule-order]");
       if (!scheduleInput) return;
       await updateOrderSchedule(scheduleInput.dataset.scheduleOrder, scheduleInput.value);
     });
@@ -268,6 +268,11 @@
     const order = getOrder(id);
     if (!order) return;
 
+    if (plannedTime && !PizzaMan.isValidOrderSlot(plannedTime)) {
+      setAdminFeedback("Choisis une heure entre 17h00 et 21h30, par tranche de 15 minutes.");
+      return;
+    }
+
     const customer = { ...(order.customer || {}) };
     if (plannedTime) {
       customer.plannedTime = plannedTime;
@@ -348,7 +353,9 @@
       <article class="schedule-card">
         <div class="schedule-time">
           <strong>${timeLabel}</strong>
-          <input type="time" value="${PizzaMan.escapeHtml(time)}" data-schedule-order="${orderId}" aria-label="Heure prévue ${orderId}">
+          <select data-schedule-order="${orderId}" aria-label="Heure prévue ${orderId}">
+            ${renderTimeOptions(time)}
+          </select>
         </div>
         <div class="schedule-details">
           <h3>${name}</h3>
@@ -416,7 +423,9 @@
           </select>
           <label class="order-time-control">
             Heure prévue
-            <input type="time" value="${PizzaMan.escapeHtml(PizzaMan.orderTimeValue(order))}" data-schedule-order="${orderId}">
+            <select data-schedule-order="${orderId}">
+              ${renderTimeOptions(PizzaMan.orderTimeValue(order))}
+            </select>
           </label>
           <button class="secondary-action" type="button" data-copy-order="${orderId}">
             <i data-lucide="copy" aria-hidden="true"></i>
@@ -429,6 +438,17 @@
         </div>
       </article>
     `;
+  }
+
+  function renderTimeOptions(selectedTime) {
+    const selected = String(selectedTime || "");
+    return [
+      `<option value="" ${selected ? "" : "selected"}>Non définie</option>`,
+      ...PizzaMan.orderTimeSlots().map((time) => {
+        const escapedTime = PizzaMan.escapeHtml(time);
+        return `<option value="${escapedTime}" ${time === selected ? "selected" : ""}>${PizzaMan.formatTimeLabel(time)}</option>`;
+      }),
+    ].join("");
   }
 
   function setAdminFeedback(message) {

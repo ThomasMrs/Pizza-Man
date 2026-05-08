@@ -901,7 +901,9 @@ fieldset {
 }
 
 .schedule-time input,
-.order-time-control input {
+.schedule-time select,
+.order-time-control input,
+.order-time-control select {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -1079,7 +1081,9 @@ fieldset {
   }
 
   .schedule-time input,
-  .order-time-control input {
+  .schedule-time select,
+  .order-time-control input,
+  .order-time-control select {
     -webkit-appearance: none;
     appearance: none;
   }
