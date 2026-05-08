@@ -19,8 +19,6 @@
   };
 
   const config = {
-    adminUsername: "christian",
-    adminAuthEmail: "christian@pizzamanstjean.fr",
     currency: "EUR",
     orderStorageKey: "pizzaman-orders",
     modificationPrice: 0.5,

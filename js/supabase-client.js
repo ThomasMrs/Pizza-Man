@@ -34,15 +34,6 @@
     };
   }
 
-  function resolveAuthEmail(identifier) {
-    const value = String(identifier || "").trim();
-    if (value.includes("@")) return value;
-    if (value.toLowerCase() === PizzaMan.config.adminUsername.toLowerCase()) {
-      return PizzaMan.config.adminAuthEmail;
-    }
-    return value;
-  }
-
   async function getSession() {
     if (!client) return null;
     const { data, error } = await client.auth.getSession();
@@ -52,7 +43,7 @@
 
   async function signIn(identifier, password) {
     if (!client) throw new Error("Supabase n'est pas configuré.");
-    const email = resolveAuthEmail(identifier);
+    const email = String(identifier || "").trim();
     const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) throw error;
     return data.session;

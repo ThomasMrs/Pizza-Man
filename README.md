@@ -31,19 +31,23 @@ pizzeria via un lien.
 ## Accès pizzeria
 
 L'accès pizzeria utilise Supabase Auth. Aucun mot de passe pizzeria ne doit être
-stocké dans le code du site ou dans ce README.
+stocké dans le code du site ou dans ce README. L'identifiant réel n'est pas
+affiché dans le formulaire et n'est pas écrit dans les fichiers publics.
 
-Alias affiché côté pizzeria : `christian`
+Créer l'utilisateur pizzeria dans le dashboard Supabase, rubrique
+`Authentication` -> `Users`, puis définir son mot de passe dans Supabase. Le mot
+de passe sera stocké côté Supabase, pas dans les fichiers GitHub Pages. Sur
+`pizzeria.html`, se connecter avec l'email du compte Supabase et son mot de
+passe.
 
-Email Supabase associé : `christian@pizzamanstjean.fr`
+Dans Supabase, donner au compte pizzeria le metadata suivant :
 
-Créer cet utilisateur dans le dashboard Supabase, rubrique `Authentication` ->
-`Users`, puis définir son mot de passe dans Supabase. Le mot de passe sera stocké
-côté Supabase, pas dans les fichiers GitHub Pages. Sur `pizzeria.html`, se
-connecter avec l'identifiant `christian`.
+```json
+{ "role": "pizzeria" }
+```
 
 Les règles RLS Supabase limitent la lecture, la modification et la suppression
-des commandes à l'email `christian@pizzamanstjean.fr`.
+des commandes aux comptes dont `app_metadata.role` vaut `pizzeria`.
 
 Après création du compte, désactiver les inscriptions publiques dans Supabase
 Auth pour éviter qu'un autre utilisateur puisse créer un compte non prévu.
