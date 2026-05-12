@@ -580,38 +580,16 @@
     };
   }
 
-  function toBoldUnicode(text) {
-    const decomposed = String(text).normalize("NFD");
-    let result = "";
-    for (const ch of decomposed) {
-      const code = ch.codePointAt(0);
-      if (code >= 0x41 && code <= 0x5a) {
-        result += String.fromCodePoint(0x1d400 + (code - 0x41));
-      } else if (code >= 0x61 && code <= 0x7a) {
-        result += String.fromCodePoint(0x1d41a + (code - 0x61));
-      } else if (code >= 0x30 && code <= 0x39) {
-        result += String.fromCodePoint(0x1d7ce + (code - 0x30));
-      } else {
-        result += ch;
-      }
-    }
-    return result;
-  }
-
   function modeEmoji(mode) {
     return mode === "Livraison" ? "🚗" : "🥡";
   }
 
   function menuItemEmoji(menuItem) {
-    if (!menuItem) return "🍕";
-    if (menuItem.type === "drink") {
-      const id = menuItem.id || "";
-      if (id.includes("vin") || id.includes("lambrusco")) return "🍷";
-      if (id.includes("despe")) return "🍺";
-      return "🥤";
-    }
-    if (menuItem.category === "La pizza dessert") return "🍰";
-    return "🍕";
+    if (!menuItem || menuItem.type !== "drink") return "";
+    const id = menuItem.id || "";
+    if (id.includes("vin") || id.includes("lambrusco")) return "🍷";
+    if (id.includes("despe")) return "🍺";
+    return "🥤";
   }
 
   function formatOrderItemLines(item) {
@@ -621,7 +599,8 @@
     const size = sizeLabel(item.size, menuItem);
     const total = formatMoney(itemTotal(item));
     const emoji = menuItemEmoji(menuItem);
-    const header = `${emoji} ${item.quantity || 1}x ${menuItem.name}${size ? ` - ${size}` : ""} (${total})`;
+    const prefix = emoji ? `${emoji} ` : "- ";
+    const header = `${prefix}${item.quantity || 1}x ${menuItem.name}${size ? ` - ${size}` : ""} (${total})`;
     const lines = [header];
 
     const extraLabels = allowsExtras(menuItem)
@@ -632,11 +611,11 @@
       : [];
 
     if (extraLabels.length) {
-      lines.push(`  ${toBoldUnicode("Suppléments")}: ${extraLabels.join(", ")}`);
+      lines.push(`  ⚠️ Suppléments: ${extraLabels.join(", ")}`);
     }
 
     if (allowsModification(menuItem) && item.modification) {
-      lines.push(`  ${toBoldUnicode("Modification")}: ${item.modification}`);
+      lines.push(`  ⚠️ Modification: ${item.modification}`);
     }
 
     return lines;
