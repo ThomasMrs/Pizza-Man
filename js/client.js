@@ -33,7 +33,7 @@
   const sizeField = document.querySelector(".segmented-field");
   const sizeControl = document.querySelector("#size-control");
   const extrasGrid = document.querySelector("#extras-grid");
-  const extrasField = extrasGrid.closest("fieldset");
+  const extrasField = document.querySelector("#extras-details");
   const extrasToggle = document.querySelector("#extras-toggle");
   const modificationInput = document.querySelector("#modification-input");
   const modificationLabel = modificationInput.closest("label");

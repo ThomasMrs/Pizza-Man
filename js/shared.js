@@ -578,25 +578,75 @@
     };
   }
 
+  function toBoldUnicode(text) {
+    const decomposed = String(text).normalize("NFD");
+    let result = "";
+    for (const ch of decomposed) {
+      const code = ch.codePointAt(0);
+      if (code >= 0x41 && code <= 0x5a) {
+        result += String.fromCodePoint(0x1d5d4 + (code - 0x41));
+      } else if (code >= 0x61 && code <= 0x7a) {
+        result += String.fromCodePoint(0x1d5ee + (code - 0x61));
+      } else if (code >= 0x30 && code <= 0x39) {
+        result += String.fromCodePoint(0x1d7ec + (code - 0x30));
+      } else {
+        result += ch;
+      }
+    }
+    return result;
+  }
+
+  function modeEmoji(mode) {
+    return mode === "Livraison" ? "🚗" : "🥡";
+  }
+
+  function formatOrderItemLines(item) {
+    const menuItem = getMenuItem(item.pizzaId);
+    if (!menuItem) return ["- Article inconnu"];
+
+    const size = sizeLabel(item.size, menuItem);
+    const total = formatMoney(itemTotal(item));
+    const header = `🍕 ${item.quantity || 1}x ${menuItem.name}${size ? ` - ${size}` : ""} (${total})`;
+    const lines = [header];
+
+    const extraLabels = allowsExtras(menuItem)
+      ? (item.extras || [])
+          .map((id) => getExtra(id))
+          .filter(Boolean)
+          .map((extra) => extra.name)
+      : [];
+
+    if (extraLabels.length) {
+      lines.push(`   ${toBoldUnicode("Suppléments")}: ${extraLabels.join(", ")}`);
+    }
+
+    if (allowsModification(menuItem) && item.modification) {
+      lines.push(`   ${toBoldUnicode("Modification")}: ${item.modification}`);
+    }
+
+    return lines;
+  }
+
   function formatOrderMessage(order) {
     const customer = order.customer || {};
     const delivery = deliveryCharge(order);
     const deliveryWarning = deliveryMinimumWarning(order);
+    const itemLines = (order.items || []).flatMap(formatOrderItemLines);
     const lines = [
-      `Commande Pizza'Man`,
+      `🍕 Commande Pizza'Man`,
       "",
-      `Client: ${customer.name || "Non renseigné"}`,
-      `Téléphone: ${customer.phone || "Non renseigné"}`,
-      `Mode: ${customer.mode || "À emporter"}`,
-      customer.desiredTime ? `Heure souhaitée: ${formatTimeLabel(customer.desiredTime)}` : "",
-      customer.address ? `Précision: ${customer.address}` : "",
-      deliveryWarning,
+      `👤 ${customer.name || "Non renseigné"}`,
+      `📞 ${customer.phone || "Non renseigné"}`,
+      `${modeEmoji(customer.mode)} ${customer.mode || "À emporter"}`,
+      customer.desiredTime ? `🕐 ${formatTimeLabel(customer.desiredTime)}` : "",
+      customer.address ? `📍 ${customer.address}` : "",
+      deliveryWarning ? `⚠️ ${deliveryWarning}` : "",
       "",
       "Articles:",
-      ...(order.items || []).map((item) => `- ${itemSummary(item)} (${formatMoney(itemTotal(item))})`),
-      delivery ? `Frais livraison: ${formatMoney(delivery)}` : "",
+      ...itemLines,
+      delivery ? `🚗 Frais livraison: ${formatMoney(delivery)}` : "",
       "",
-      `Total: ${formatMoney(orderTotal(order))}`,
+      `💰 Total: ${formatMoney(orderTotal(order))}`,
     ];
 
     return lines.filter((line, index) => line !== "" || lines[index - 1] !== "").join("\n");
