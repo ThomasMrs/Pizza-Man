@@ -268,6 +268,8 @@
     cartItems.addEventListener("click", (event) => {
       const editButton = event.target.closest("button[data-edit-item]");
       const removeButton = event.target.closest("button[data-remove-item]");
+      const plusButton = event.target.closest("button[data-cart-plus]");
+      const minusButton = event.target.closest("button[data-cart-minus]");
 
       if (editButton) {
         openDialog(state.cart[Number(editButton.dataset.editItem)].pizzaId, Number(editButton.dataset.editItem));
@@ -275,6 +277,21 @@
 
       if (removeButton) {
         state.cart.splice(Number(removeButton.dataset.removeItem), 1);
+        renderCart();
+      }
+
+      if (plusButton) {
+        const idx = Number(plusButton.dataset.cartPlus);
+        state.cart[idx].quantity = (state.cart[idx].quantity || 1) + 1;
+        renderCart();
+      }
+
+      if (minusButton) {
+        const idx = Number(minusButton.dataset.cartMinus);
+        state.cart[idx].quantity = (state.cart[idx].quantity || 1) - 1;
+        if (state.cart[idx].quantity <= 0) {
+          state.cart.splice(idx, 1);
+        }
         renderCart();
       }
     });
@@ -387,6 +404,15 @@
     dialogPrice.textContent = PizzaMan.formatMoney(PizzaMan.itemTotal(tempItem));
   }
 
+  function cartItemSignature(item) {
+    return [
+      item.pizzaId,
+      item.size,
+      [...(item.extras || [])].sort().join(","),
+      String(item.modification || "").trim(),
+    ].join("|");
+  }
+
   function saveDialogItem() {
     const itemData = PizzaMan.getMenuItem(state.selectedPizzaId);
     const item = {
@@ -402,7 +428,13 @@
     if (state.editingIndex !== null) {
       state.cart[state.editingIndex] = item;
     } else {
-      state.cart.push(item);
+      const sig = cartItemSignature(item);
+      const matchIdx = state.cart.findIndex((existing) => cartItemSignature(existing) === sig);
+      if (matchIdx >= 0) {
+        state.cart[matchIdx].quantity += item.quantity;
+      } else {
+        state.cart.push(item);
+      }
     }
 
     dialog.close();
@@ -438,20 +470,34 @@
         const size = PizzaMan.escapeHtml(PizzaMan.sizeLabel(item.size, menuItem));
         const extrasLabel = PizzaMan.escapeHtml(extras);
         const modification = PizzaMan.escapeHtml(item.modification || "");
-        const titleLine = size ? `${item.quantity}x ${itemName} · ${size}` : `${item.quantity}x ${itemName}`;
+        const titleLine = size ? `${itemName} · ${size}` : `${itemName}`;
+        const hasCustomization = Boolean(extrasLabel || modification);
         return `
           <article class="cart-item">
-            <div class="cart-item-info">
+            <div class="cart-item-header">
               <h3>${titleLine}</h3>
-              ${extrasLabel ? `<p><strong>Suppléments: ${extrasLabel}</strong></p>` : ""}
-              ${modification ? `<p><strong>Modification: ${modification}</strong></p>` : ""}
-            </div>
-            <div class="cart-item-side">
               <strong>${PizzaMan.formatMoney(PizzaMan.itemTotal(item))}</strong>
-              <div class="cart-item-actions">
-                <button class="icon-button" type="button" data-edit-item="${index}" aria-label="Modifier cet article">
-                  <i data-lucide="pencil" aria-hidden="true"></i>
+            </div>
+            ${extrasLabel ? `<p><strong>Suppléments: ${extrasLabel}</strong></p>` : ""}
+            ${modification ? `<p><strong>Modification: ${modification}</strong></p>` : ""}
+            <div class="cart-item-controls">
+              <div class="cart-stepper" aria-label="Quantité">
+                <button type="button" data-cart-minus="${index}" aria-label="Retirer une pizza">
+                  <i data-lucide="minus" aria-hidden="true"></i>
                 </button>
+                <strong>${item.quantity}</strong>
+                <button type="button" data-cart-plus="${index}" aria-label="Ajouter une pizza">
+                  <i data-lucide="plus" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="cart-item-icons">
+                ${
+                  hasCustomization
+                    ? `<button class="icon-button" type="button" data-edit-item="${index}" aria-label="Modifier cet article">
+                        <i data-lucide="pencil" aria-hidden="true"></i>
+                      </button>`
+                    : ""
+                }
                 <button class="icon-button" type="button" data-remove-item="${index}" aria-label="Retirer cet article">
                   <i data-lucide="trash-2" aria-hidden="true"></i>
                 </button>

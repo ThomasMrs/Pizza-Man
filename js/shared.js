@@ -13,7 +13,7 @@
     deliveryZones: "Le Boulou, Céret, Maureillas, St Jean",
     deliveryFee: 4,
     deliveryMinimum: 2,
-    maxExtrasPerPizza: 3,
+    maxExtrasPerPizza: Infinity,
     orderStartTime: "18:45",
     orderEndTime: "21:30",
     orderSlotMinutes: 15,
