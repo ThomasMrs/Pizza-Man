@@ -438,24 +438,24 @@
         const size = PizzaMan.escapeHtml(PizzaMan.sizeLabel(item.size, menuItem));
         const extrasLabel = PizzaMan.escapeHtml(extras);
         const modification = PizzaMan.escapeHtml(item.modification || "");
+        const titleLine = size ? `${item.quantity}x ${itemName} · ${size}` : `${item.quantity}x ${itemName}`;
         return `
           <article class="cart-item">
-            <div class="cart-item-head">
-              <div>
-                <h3>${item.quantity}x ${itemName}</h3>
-                ${size ? `<p>${size}</p>` : ""}
-                ${extrasLabel ? `<p><strong>Suppléments: ${extrasLabel}</strong></p>` : ""}
-              </div>
-              <strong>${PizzaMan.formatMoney(PizzaMan.itemTotal(item))}</strong>
+            <div class="cart-item-info">
+              <h3>${titleLine}</h3>
+              ${extrasLabel ? `<p><strong>Suppléments: ${extrasLabel}</strong></p>` : ""}
+              ${modification ? `<p><strong>Modification: ${modification}</strong></p>` : ""}
             </div>
-            ${modification ? `<p><strong>Modification: ${modification}</strong></p>` : ""}
-            <div class="cart-item-actions">
-              <button class="icon-button" type="button" data-edit-item="${index}" aria-label="Modifier cet article">
-                <i data-lucide="pencil" aria-hidden="true"></i>
-              </button>
-              <button class="icon-button" type="button" data-remove-item="${index}" aria-label="Retirer cet article">
-                <i data-lucide="trash-2" aria-hidden="true"></i>
-              </button>
+            <div class="cart-item-side">
+              <strong>${PizzaMan.formatMoney(PizzaMan.itemTotal(item))}</strong>
+              <div class="cart-item-actions">
+                <button class="icon-button" type="button" data-edit-item="${index}" aria-label="Modifier cet article">
+                  <i data-lucide="pencil" aria-hidden="true"></i>
+                </button>
+                <button class="icon-button" type="button" data-remove-item="${index}" aria-label="Retirer cet article">
+                  <i data-lucide="trash-2" aria-hidden="true"></i>
+                </button>
+              </div>
             </div>
           </article>
         `;
