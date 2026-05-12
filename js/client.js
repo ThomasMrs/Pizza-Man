@@ -114,7 +114,7 @@
     openingStatus.classList.toggle("is-closed", !isOpen);
     openingStatusLabel.textContent = isOpen
       ? "Ouvert - jusqu'à 21h30"
-      : "Fermé - commandes possibles pour 17h à 21h30";
+      : "Fermé - commandes possibles pour 18h45 à 21h30";
   }
 
   function renderMenu() {
@@ -510,7 +510,7 @@
     }
 
     if (!PizzaMan.isValidOrderSlot(order.customer.desiredTime)) {
-      setFeedback("Choisis une heure entre 17h00 et 21h30, par tranche de 15 minutes.");
+      setFeedback("Choisis une heure entre 18h45 et 21h30, par tranche de 15 minutes.");
       return;
     }
 
