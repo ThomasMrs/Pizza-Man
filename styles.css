@@ -146,17 +146,12 @@ a {
   color: rgba(255, 253, 248, 0.86);
 }
 
-.intro-band h1,
-.login-panel h1,
-.admin-title-row h1 {
-  margin: 0;
-  line-height: 1.02;
-  letter-spacing: 0;
-}
-
 .intro-band h1 {
+  margin: 0;
   max-width: 680px;
   font-size: clamp(2.1rem, 6vw, 4.9rem);
+  line-height: 1.02;
+  letter-spacing: 0;
 }
 
 .intro-band p {
@@ -429,25 +424,21 @@ a {
   outline: none;
 }
 
-.cart-panel,
-.login-panel,
-.import-panel,
-.manual-import,
-.schedule-panel {
+.cart-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 253, 248, 0.96);
   box-shadow: var(--shadow);
 }
 
+.cart-item p strong {
+  color: var(--ink);
+}
+
 .cart-panel {
-  position: sticky;
-  top: 86px;
   align-self: start;
   display: grid;
   gap: 16px;
-  max-height: calc(100vh - 110px);
-  overflow: auto;
   padding: 18px;
 }
 
@@ -528,11 +519,8 @@ a {
 }
 
 .customer-form,
-.login-form,
 .message-preview,
-.dialog-content,
-.manual-import,
-.schedule-panel {
+.dialog-content {
   display: grid;
   gap: 12px;
 }
@@ -715,6 +703,62 @@ fieldset {
   background: var(--green);
 }
 
+.extras-details {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.extras-details > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px 14px;
+  color: var(--green-dark);
+  font-weight: 850;
+  list-style: none;
+}
+
+.extras-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.extras-toggle-label {
+  flex: 1 1 auto;
+}
+
+.extras-toggle-count {
+  color: var(--red-dark);
+  background: rgba(184, 50, 43, 0.09);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.extras-chevron {
+  transition: transform 0.2s ease;
+}
+
+.extras-details[open] > summary .extras-chevron {
+  transform: rotate(180deg);
+}
+
+.extras-details > .extras-grid,
+.extras-details > .option-note {
+  margin: 0 14px;
+}
+
+.extras-details > .extras-grid {
+  margin-top: 4px;
+}
+
+.extras-details > .option-note {
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+
 .extras-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -780,256 +824,9 @@ fieldset {
   width: 100%;
 }
 
-.admin-body {
-  background:
-    linear-gradient(90deg, rgba(14, 91, 63, 0.07), transparent 26%, transparent 74%, rgba(184, 50, 43, 0.07)),
-    #f7f1e8;
-}
-
-.admin-main {
-  width: min(1180px, 100%);
-  margin: 0 auto;
-  padding: clamp(20px, 4vw, 42px);
-}
-
-.login-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 370px);
-  gap: clamp(18px, 4vw, 46px);
-  align-items: center;
-  padding: clamp(22px, 5vw, 52px);
-}
-
-.login-panel h1,
-.admin-title-row h1 {
-  color: var(--green-dark);
-  font-size: clamp(2rem, 5vw, 3.5rem);
-}
-
-.login-panel p {
-  max-width: 590px;
-  color: var(--muted);
-  line-height: 1.65;
-}
-
-.admin-workspace {
-  display: grid;
-  gap: 18px;
-}
-
-.admin-title-row,
-.import-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.admin-title-row h1,
-.import-panel h2,
-.order-card h2,
-.import-panel p {
-  overflow-wrap: anywhere;
-}
-
-.admin-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 9px;
-}
-
-.import-panel,
-.manual-import,
-.schedule-panel {
-  padding: 18px;
-}
-
-.import-panel p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
-.inline-tools {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-}
-
-.inline-tools input,
-.inline-tools button {
-  min-width: 0;
-}
-
-.admin-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-}
-
-.filter-button {
-  padding: 0 13px;
-}
-
-.orders-list {
-  display: grid;
-  gap: 12px;
-}
-
-.schedule-panel {
-  gap: 14px;
-}
-
-.schedule-list {
-  display: grid;
-  gap: 10px;
-}
-
-.schedule-card {
-  display: grid;
-  grid-template-columns: minmax(140px, 170px) minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: center;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
-}
-
-.schedule-card > *,
-.order-card > * {
-  min-width: 0;
-}
-
-.schedule-time {
-  display: grid;
-  gap: 8px;
-  min-width: 0;
-}
-
-.schedule-time strong {
-  color: var(--red-dark);
-  font-size: 1.45rem;
-  line-height: 1;
-}
-
-.schedule-time input,
-.schedule-time select,
-.order-time-control input,
-.order-time-control select {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  min-height: 42px;
-  padding: 8px 10px;
-}
-
-.schedule-details h3 {
-  margin: 0 0 5px;
-  color: var(--green-dark);
-  font-size: 1.05rem;
-}
-
-.schedule-details p,
-.schedule-details span {
-  display: block;
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-.schedule-meta {
-  display: grid;
-  justify-items: end;
-  gap: 5px;
-  color: var(--muted);
-  font-size: 0.88rem;
-  font-weight: 850;
-  text-align: right;
-}
-
-.schedule-meta strong {
-  color: var(--red-dark);
-}
-
-.order-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-left: 6px solid var(--green);
-  border-radius: 8px;
-  background: var(--paper);
-  box-shadow: 0 12px 28px rgba(31, 27, 23, 0.08);
-}
-
-.order-card.status-ready {
-  border-left-color: var(--red);
-}
-
-.order-card.status-done {
-  opacity: 0.72;
-  border-left-color: var(--muted);
-}
-
-.order-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.order-meta span {
-  border-radius: 999px;
-  padding: 5px 9px;
-  color: var(--muted);
-  background: rgba(110, 98, 86, 0.1);
-  font-size: 0.82rem;
-  font-weight: 850;
-}
-
-.order-card h2 {
-  margin: 0 0 8px;
-  color: var(--green-dark);
-  font-size: 1.25rem;
-}
-
-.order-card ul {
-  display: grid;
-  gap: 6px;
-  margin: 10px 0 0;
-  padding-left: 18px;
-  color: var(--ink);
-}
-
-.order-card p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.48;
-}
-
-.order-actions {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  min-width: 190px;
-}
-
-.order-actions select {
-  min-height: 44px;
-}
-
-.order-time-control {
-  gap: 6px;
-  font-size: 0.82rem;
-}
-
 @media (max-width: 980px) {
   .intro-band,
   .order-layout,
-  .login-panel,
   .dialog-card,
   .business-strip {
     grid-template-columns: 1fr;
@@ -1037,11 +834,6 @@ fieldset {
 
   .intro-status {
     justify-self: start;
-  }
-
-  .cart-panel {
-    position: static;
-    max-height: none;
   }
 
   .dialog-media img {
@@ -1076,35 +868,13 @@ fieldset {
     align-content: end;
   }
 
-  .order-layout,
-  .admin-main {
+  .order-layout {
     padding-inline: 14px;
   }
 
   .category-grid,
-  .action-grid,
-  .extras-grid,
-  .inline-tools,
-  .order-card,
-  .schedule-card {
+  .extras-grid {
     grid-template-columns: 1fr;
-  }
-
-  .schedule-meta {
-    justify-items: start;
-    text-align: left;
-  }
-
-  .schedule-card {
-    overflow: hidden;
-  }
-
-  .schedule-time input,
-  .schedule-time select,
-  .order-time-control input,
-  .order-time-control select {
-    -webkit-appearance: none;
-    appearance: none;
   }
 
   .pizza-card p {
@@ -1113,35 +883,6 @@ fieldset {
 
   .mobile-cart-jump {
     display: inline-flex;
-  }
-
-  .admin-title-row,
-  .import-panel {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .admin-title-row h1 {
-    font-size: 2.25rem;
-  }
-
-  .import-panel h2 {
-    font-size: 1.75rem;
-  }
-
-  .admin-actions {
-    justify-content: stretch;
-  }
-
-  .admin-actions .secondary-action,
-  .import-panel .primary-action,
-  .inline-tools .secondary-action {
-    flex: 1 1 150px;
-    width: 100%;
-  }
-
-  .order-actions {
-    min-width: 0;
   }
 
   body {

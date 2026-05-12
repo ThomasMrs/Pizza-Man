@@ -18,11 +18,8 @@
         <span>Pizza'Man St Jean</span>
       </a>
       <nav class="top-nav" aria-label="Navigation principale">
-        <a href="#carte">Carte</a>
-        <a href="#commande">Commande</a>
         <a href="https://www.facebook.com/pizzaman.stjean/?ref=page_internal" target="_blank" rel="noreferrer">Facebook</a>
         <a href="https://share.google/MiNwfMVDMd9wwK8vd" target="_blank" rel="noreferrer">Google</a>
-        <a href="pizzeria.html">Pizzeria</a>
       </nav>
     </header>
 
@@ -138,27 +135,6 @@
             Commander
           </button>
 
-          <!--
-          <div class="action-grid">
-            <button class="primary-action" id="copy-message" type="button">
-              <i data-lucide="copy" aria-hidden="true"></i>
-              Copier
-            </button>
-            <a class="secondary-action" id="whatsapp-link" href="#" target="_blank" rel="noreferrer">
-              <i data-lucide="send" aria-hidden="true"></i>
-              WhatsApp
-            </a>
-            <a class="secondary-action" id="sms-link" href="#">
-              <i data-lucide="message-square" aria-hidden="true"></i>
-              SMS
-            </a>
-            <button class="secondary-action" id="copy-order-link" type="button">
-              <i data-lucide="link" aria-hidden="true"></i>
-              Lien pizzeria
-            </button>
-          </div>
-          -->
-
           <p class="form-note" id="client-feedback" role="status" aria-live="polite"></p>
         </aside>
       </section>
@@ -187,11 +163,15 @@
             <div class="segmented-control" id="size-control"></div>
           </fieldset>
 
-          <fieldset>
-            <legend>Suppléments</legend>
+          <details class="extras-details" id="extras-details">
+            <summary id="extras-toggle">
+              <span class="extras-toggle-label">Suppléments</span>
+              <span class="extras-toggle-count">Aucun</span>
+              <i data-lucide="chevron-down" aria-hidden="true" class="extras-chevron"></i>
+            </summary>
             <div class="extras-grid" id="extras-grid"></div>
             <p class="option-note">Maximum 3 suppléments. Le prix dépend de la taille sélectionnée.</p>
-          </fieldset>
+          </details>
 
           <label>
             Modification
@@ -224,9 +204,7 @@
     </dialog>
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/shared.js"></script>
-    <script src="js/supabase-client.js"></script>
     <script src="js/client.js"></script>
   </body>
 </html>

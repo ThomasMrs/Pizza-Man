@@ -17,14 +17,12 @@
     orderStartTime: "17:00",
     orderEndTime: "21:30",
     orderSlotMinutes: 15,
-    pizzaCapacityPerSlot: 8,
     deliveryNote: "Livraison à partir de 2 pizzas, pas de pizza offerte en livraison.",
     allergenNote: "Liste des allergènes disponible sur demande.",
   };
 
   const config = {
     currency: "EUR",
-    orderStorageKey: "pizzaman-orders",
     modificationPrice: 0.5,
     supplementPrices: {
       small: 1,
@@ -377,29 +375,8 @@
     single: "",
   };
 
-  function createOrderId(date = new Date()) {
-    const pad = (value) => String(value).padStart(2, "0");
-    const compactDate = [
-      date.getFullYear(),
-      pad(date.getMonth() + 1),
-      pad(date.getDate()),
-      pad(date.getHours()),
-      pad(date.getMinutes()),
-      pad(date.getSeconds()),
-    ].join("");
-    return `PM-${compactDate}`;
-  }
-
   function padTimePart(value) {
     return String(value).padStart(2, "0");
-  }
-
-  function todayServiceDate(date = new Date()) {
-    return [
-      date.getFullYear(),
-      padTimePart(date.getMonth() + 1),
-      padTimePart(date.getDate()),
-    ].join("-");
   }
 
   function timeToMinutes(time) {
@@ -432,89 +409,11 @@
     return slots;
   }
 
-  function orderSlotValue(order) {
-    const time = orderTimeValue(order);
-    return isValidOrderSlot(time) ? time : "";
-  }
-
-  function slotUsageFromOrders(orders, serviceDate = todayServiceDate(), excludedOrderId = "") {
-    const orderedOrders = (orders || [])
-      .map((order, index) => ({ order, index }))
-      .sort((left, right) => {
-        const leftTime = Date.parse(left.order && left.order.createdAt ? left.order.createdAt : "");
-        const rightTime = Date.parse(right.order && right.order.createdAt ? right.order.createdAt : "");
-        if (!Number.isNaN(leftTime) && !Number.isNaN(rightTime) && leftTime !== rightTime) return leftTime - rightTime;
-        if (!Number.isNaN(leftTime) && Number.isNaN(rightTime)) return -1;
-        if (Number.isNaN(leftTime) && !Number.isNaN(rightTime)) return 1;
-        return left.index - right.index;
-      })
-      .map(({ order }) => order);
-
-    return orderedOrders.reduce((usage, order) => {
-      if (!order || order.id === excludedOrderId || order.status === "Terminée") return usage;
-      if (orderServiceDate(order) !== serviceDate) return usage;
-
-      const slot = orderSlotValue(order);
-      if (!slot) return usage;
-
-      slotPlanForPizzaCount(usage, slot, pizzaCount(order)).slots.forEach((plannedSlot) => {
-        usage.set(plannedSlot.slot, (usage.get(plannedSlot.slot) || 0) + plannedSlot.pizzaCount);
-      });
-
-      return usage;
-    }, new Map());
-  }
-
-  function slotPizzaCount(slotUsage, slot) {
-    if (!slotUsage) return 0;
-    if (slotUsage instanceof Map) return slotUsage.get(slot) || 0;
-    return Number(slotUsage[slot] || 0);
-  }
-
-  function slotRemaining(slotUsage, slot) {
-    return Math.max(0, business.pizzaCapacityPerSlot - slotPizzaCount(slotUsage, slot));
-  }
-
-  function slotPlanForPizzaCount(slotUsage, slot, pizzaQuantity) {
-    if (!isValidOrderSlot(slot)) {
-      return { canFit: false, slots: [], remainingPizzas: Math.max(0, Number(pizzaQuantity) || 0) };
-    }
-
-    const quantity = Math.max(0, Number(pizzaQuantity) || 0);
-    if (quantity === 0) {
-      return { canFit: true, slots: [], remainingPizzas: 0 };
-    }
-
-    const slots = orderTimeSlots();
-    const startIndex = slots.indexOf(slot);
-    if (startIndex === -1) {
-      return { canFit: false, slots: [], remainingPizzas: quantity };
-    }
-
-    let remainingPizzas = quantity;
-    const plannedSlots = [];
-
-    for (let index = startIndex; index < slots.length && remainingPizzas > 0; index += 1) {
-      const currentSlot = slots[index];
-      const available = slotRemaining(slotUsage, currentSlot);
-      if (available <= 0) break;
-
-      const pizzaCountForSlot = Math.min(available, remainingPizzas);
-      plannedSlots.push({ slot: currentSlot, pizzaCount: pizzaCountForSlot });
-      remainingPizzas -= pizzaCountForSlot;
-    }
-
-    return {
-      canFit: remainingPizzas === 0,
-      slots: plannedSlots,
-      remainingPizzas,
-      endSlot: plannedSlots.length ? plannedSlots[plannedSlots.length - 1].slot : "",
-    };
-  }
-
-  function canFitInSlot(slotUsage, slot, pizzaQuantity) {
-    if (!slot) return false;
-    return slotPlanForPizzaCount(slotUsage, slot, pizzaQuantity).canFit;
+  function isSlotInPast(time, now = new Date()) {
+    const value = timeToMinutes(time);
+    if (value === null) return true;
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    return value <= currentMinutes;
   }
 
   function formatMoney(value) {
@@ -539,10 +438,6 @@
 
   function getMenuItem(id) {
     return menu.find((item) => item.id === id);
-  }
-
-  function getPizza(id) {
-    return getMenuItem(id);
   }
 
   function getExtra(id) {
@@ -620,16 +515,6 @@
     return (order.items || []).reduce((count, item) => count + (item.quantity || 1), 0);
   }
 
-  function orderTimeValue(order) {
-    const customer = order.customer || {};
-    return customer.plannedTime || customer.desiredTime || "";
-  }
-
-  function orderServiceDate(order) {
-    const customer = order.customer || {};
-    return customer.serviceDate || todayServiceDate();
-  }
-
   function formatTimeLabel(time) {
     if (!time) return "Heure non définie";
     const parts = String(time).split(":");
@@ -676,12 +561,8 @@
     return parts.join(" - ");
   }
 
-  function createOrder(cart, customer, metadata = {}) {
-    const now = metadata.createdAt ? new Date(metadata.createdAt) : new Date();
-
+  function createOrder(cart, customer) {
     return {
-      id: metadata.id || createOrderId(now),
-      createdAt: metadata.createdAt || now.toISOString(),
       status: "À faire",
       customer: {
         name: customer.name || "",
@@ -689,8 +570,6 @@
         mode: customer.mode || "À emporter",
         address: customer.address || "",
         desiredTime: customer.desiredTime || "",
-        plannedTime: customer.plannedTime || "",
-        serviceDate: customer.serviceDate || todayServiceDate(now),
       },
       items: cart.map((item) => ({
         ...item,
@@ -704,13 +583,12 @@
     const delivery = deliveryCharge(order);
     const deliveryWarning = deliveryMinimumWarning(order);
     const lines = [
-      `Commande Pizza'Man ${order.id}`,
+      `Commande Pizza'Man`,
       "",
       `Client: ${customer.name || "Non renseigné"}`,
       `Téléphone: ${customer.phone || "Non renseigné"}`,
       `Mode: ${customer.mode || "À emporter"}`,
       customer.desiredTime ? `Heure souhaitée: ${formatTimeLabel(customer.desiredTime)}` : "",
-      customer.plannedTime ? `Heure prévue pizzeria: ${formatTimeLabel(customer.plannedTime)}` : "",
       customer.address ? `Précision: ${customer.address}` : "",
       deliveryWarning,
       "",
@@ -724,53 +602,14 @@
     return lines.filter((line, index) => line !== "" || lines[index - 1] !== "").join("\n");
   }
 
-  function encodeOrder(order) {
-    const json = JSON.stringify(order);
-    const bytes = new TextEncoder().encode(json);
-    let binary = "";
-    bytes.forEach((byte) => {
-      binary += String.fromCharCode(byte);
-    });
-    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-  }
-
-  function decodeOrder(value) {
-    const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
-    const binary = atob(padded);
-    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-    const json = new TextDecoder().decode(bytes);
-    return JSON.parse(json);
-  }
-
-  function buildPizzeriaLink(order) {
-    const url = new URL("pizzeria.html", window.location.href);
-    url.searchParams.set("order", encodeOrder(order));
-    return url.toString();
-  }
-
-  function loadOrders() {
-    try {
-      return JSON.parse(localStorage.getItem(config.orderStorageKey) || "[]");
-    } catch (error) {
-      return [];
-    }
-  }
-
-  function saveOrders(orders) {
-    localStorage.setItem(config.orderStorageKey, JSON.stringify(orders));
-  }
-
   window.PizzaMan = {
     business,
     menu,
     extras,
     config,
-    createOrderId,
     escapeHtml,
     formatMoney,
     getMenuItem,
-    getPizza,
     getExtra,
     getAvailableSizes,
     getDefaultSize,
@@ -784,17 +623,9 @@
     itemsSubtotal,
     pizzaCount,
     articleCount,
-    todayServiceDate,
     isValidOrderSlot,
     orderTimeSlots,
-    orderSlotValue,
-    slotUsageFromOrders,
-    slotPizzaCount,
-    slotRemaining,
-    slotPlanForPizzaCount,
-    canFitInSlot,
-    orderTimeValue,
-    orderServiceDate,
+    isSlotInPast,
     formatTimeLabel,
     deliveryCharge,
     deliveryMinimumWarning,
@@ -802,10 +633,5 @@
     itemSummary,
     createOrder,
     formatOrderMessage,
-    encodeOrder,
-    decodeOrder,
-    buildPizzeriaLink,
-    loadOrders,
-    saveOrders,
   };
 })();

@@ -1,8 +1,8 @@
 # Pizza-Man
 
 Site statique GitHub Pages pour Pizza'Man St Jean, cuisson au feu de bois depuis
-1996. Le site permet de composer une commande client et de l'importer côté
-pizzeria via un lien.
+1996. Le site permet à un client de composer une commande et de l'envoyer par
+SMS à la pizzeria.
 
 ## Informations intégrées
 
@@ -17,92 +17,31 @@ pizzeria via un lien.
 
 ## Fichiers
 
-- `index.html` : interface client responsive, sans compte.
-- `pizzeria.html` : interface pizzeria avec connexion sécurisée Supabase Auth.
+- `index.html` : interface client responsive.
 - `js/shared.js` : carte complète, suppléments, prix et helpers de commande.
-- `js/supabase-client.js` : connexion Supabase pour enregistrer les commandes.
-- `js/client.js` : panier, personnalisation, message et lien de commande.
-- `js/admin.js` : import des liens de commande, statuts et lecture Supabase.
-- `styles.css` : interface mobile et ordinateur.
+- `js/client.js` : panier, personnalisation, génération du message SMS.
+- `styles.css` : styles desktop et mobile.
 - `assets/pizzaman-logo-clean.png` : logo découpé utilisé par le site.
 - `assets/favicon.png` : logo de l'onglet du navigateur.
-- `supabase/migrations/202605060001_create_orders.sql` : table `orders` et règles RLS.
-
-## Accès pizzeria
-
-L'accès pizzeria utilise Supabase Auth. Aucun mot de passe pizzeria ne doit être
-stocké dans le code du site ou dans ce README. L'identifiant réel n'est pas
-affiché dans le formulaire et n'est pas écrit dans les fichiers publics.
-
-Créer l'utilisateur pizzeria `christian@pizza.com` dans le dashboard Supabase,
-rubrique `Authentication` -> `Users`, puis définir son mot de passe dans
-Supabase. Le mot de passe sera stocké côté Supabase, pas dans les fichiers
-GitHub Pages.
-
-Les règles RLS Supabase limitent la lecture, la modification et la suppression
-des commandes au compte `christian@pizza.com`.
-
-Après création du compte, désactiver les inscriptions publiques dans Supabase
-Auth pour éviter qu'un autre utilisateur puisse créer un compte non prévu.
 
 ## Fonctionnement des commandes
 
-Le client ajoute des pizzas, choisit petite ou grande taille, ajoute des
-suppléments et peut préciser une modification. Le site calcule aussi :
+Le client ajoute des pizzas, choisit petite ou grande taille, déploie les
+suppléments et peut préciser une modification. Le site calcule :
 
 - supplément petite pizza : `1 EUR` ;
 - supplément grande pizza : `1,50 EUR` ;
 - modification : `0,50 EUR` ;
 - frais de livraison : `4 EUR` si le client choisit la livraison.
 
-Le site génère ensuite une commande par SMS. Le message contient aussi un lien
-pizzeria de secours pour retrouver la commande si l'enregistrement Supabase
-n'est pas encore disponible.
-
-Le client peut renseigner une heure souhaitée. Côté pizzeria, le planning des
-commandes affiche les commandes actives et permet d'ajuster l'heure prévue.
-
-Quand le client copie ou envoie le message, le site tente aussi d'enregistrer la
-commande dans Supabase. Le lien pizzeria ouvre `pizzeria.html` avec la commande
-préremplie. Après connexion, il suffit de cliquer sur `Ajouter` si la commande
-n'apparaît pas déjà dans la liste.
-
-## Supabase
-
-URL configurée : `https://mqaxjswqchyjgtqlcwxw.supabase.co`
-
-La clé publishable est configurée dans `js/supabase-client.js`. Ne pas mettre le
-mot de passe PostgreSQL dans le code du site.
-
-Le CLI Supabase n'est pas installé sur cette machine. Une fois installé, lancer :
-
-```powershell
-supabase login
-supabase init
-supabase link --project-ref mqaxjswqchyjgtqlcwxw
-supabase db push
-```
-
-La migration active :
-
-```text
-supabase/migrations/202605060001_create_orders.sql
-```
+Le client renseigne une heure souhaitée (par tranche de 15 min entre 17h00 et
+21h30). Les créneaux déjà passés sont automatiquement masqués. Quand il valide,
+son téléphone ouvre l'application SMS avec le message préremplie pour la
+pizzeria.
 
 ## Tester en local
 
-Ouvrir `index.html` dans un navigateur pour tester l’interface client. Ouvrir
-`pizzeria.html` pour tester l’interface pizzeria.
-
-Pour publier sur GitHub Pages : `Settings` -> `Pages`, puis sélectionner la
-branche `main` et le dossier racine.
-
-## Important pour GitHub Pages
-
-GitHub Pages héberge uniquement des fichiers statiques. La version actuelle
-utilise Supabase pour une base partagée et Supabase Auth pour l'accès pizzeria.
-Si Supabase n'est pas configuré, l'espace pizzeria sécurisé ne peut pas se
-connecter.
+Ouvrir `index.html` dans un navigateur. Aucun backend n'est requis.
 
 ## Mise à jour de la carte
 
@@ -115,4 +54,8 @@ tableau `menu` dans `js/shared.js`. Chaque article contient :
 - `prices.small` : prix petite pizza ;
 - `prices.large` : prix grande pizza ;
 - `prices.single` : prix unique, pour les boissons ;
-- `image` : URL de l’image.
+- `image` : URL de l'image.
+
+## Publier sur GitHub Pages
+
+`Settings` -> `Pages`, puis sélectionner la branche `main` et le dossier racine.

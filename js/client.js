@@ -6,9 +6,6 @@
     selectedSize: "small",
     selectedExtras: new Set(),
     quantity: 1,
-    orderMeta: null,
-    slotUsage: new Map(),
-    slotUsageLoaded: false,
   };
 
   const menuGrid = document.querySelector("#menu-grid");
@@ -24,10 +21,6 @@
   const openingStatusLabel = document.querySelector("#opening-status-label");
   const messageOutput = document.querySelector("#message-output");
   const orderButton = document.querySelector("#order-button");
-  const copyMessageButton = document.querySelector("#copy-message");
-  const copyOrderLinkButton = document.querySelector("#copy-order-link");
-  const whatsappLink = document.querySelector("#whatsapp-link");
-  const smsLink = document.querySelector("#sms-link");
   const feedback = document.querySelector("#client-feedback");
   const deliveryMinimumWarning = document.querySelector("#delivery-minimum-warning");
   const mobileCartJump = document.querySelector("#mobile-cart-jump");
@@ -41,6 +34,7 @@
   const sizeControl = document.querySelector("#size-control");
   const extrasGrid = document.querySelector("#extras-grid");
   const extrasField = extrasGrid.closest("fieldset");
+  const extrasToggle = document.querySelector("#extras-toggle");
   const modificationInput = document.querySelector("#modification-input");
   const modificationLabel = modificationInput.closest("label");
   const quantityValue = document.querySelector("#quantity-value");
@@ -57,8 +51,10 @@
     renderCart();
     bindEvents();
     setupMobileCartVisibility();
-    refreshSlotUsage();
-    window.setInterval(renderOpeningStatus, 60000);
+    window.setInterval(() => {
+      renderOpeningStatus();
+      renderTimeSlots();
+    }, 60000);
     refreshIcons();
   }
 
@@ -82,58 +78,22 @@
     if (!desiredTimeSelect) return;
 
     const selectedTime = desiredTimeSelect.value;
-    const cartPizzaCount = PizzaMan.pizzaCount({ items: state.cart });
-    const selectedAvailable = !selectedTime || isTimeAvailableForCart(selectedTime, cartPizzaCount);
-    const requestedPizzaCount = Math.max(1, cartPizzaCount);
+    const now = new Date();
+    const slots = PizzaMan.orderTimeSlots().filter((time) => !PizzaMan.isSlotInPast(time, now));
+    const selectedStillAvailable = selectedTime && slots.includes(selectedTime);
 
     desiredTimeSelect.innerHTML = [
       '<option value="">Choisir une heure</option>',
-      ...PizzaMan.orderTimeSlots().map((time) => {
-        const remaining = PizzaMan.slotRemaining(state.slotUsage, time);
-        const plan = PizzaMan.slotPlanForPizzaCount(state.slotUsage, time, requestedPizzaCount);
-        const disabled = !plan.canFit;
-        let label =
-          remaining <= 0
-            ? `${PizzaMan.formatTimeLabel(time)} - complet`
-            : `${PizzaMan.formatTimeLabel(time)} - ${remaining} pizza${remaining > 1 ? "s" : ""} restante${
-                remaining > 1 ? "s" : ""
-              }`;
-
-        if (cartPizzaCount > PizzaMan.business.pizzaCapacityPerSlot) {
-          label = plan.canFit
-            ? `${PizzaMan.formatTimeLabel(time)} - OK sur ${plan.slots.length} créneaux`
-            : `${PizzaMan.formatTimeLabel(time)} - pas assez de place`;
-        } else if (cartPizzaCount > 0 && !plan.canFit && remaining > 0) {
-          label = `${PizzaMan.formatTimeLabel(time)} - pas assez de place`;
-        }
-
-        return `<option value="${PizzaMan.escapeHtml(time)}" ${disabled ? "disabled" : ""} ${
-          time === selectedTime && selectedAvailable ? "selected" : ""
-        }>${PizzaMan.escapeHtml(label)}</option>`;
-      }),
+      ...slots.map(
+        (time) =>
+          `<option value="${PizzaMan.escapeHtml(time)}" ${
+            time === selectedTime && selectedStillAvailable ? "selected" : ""
+          }>${PizzaMan.escapeHtml(PizzaMan.formatTimeLabel(time))}</option>`,
+      ),
     ].join("");
 
-    if (selectedTime && !selectedAvailable) {
-      setFeedback("Ce créneau n'a plus assez de place pour cette commande.");
-    }
-  }
-
-  function isTimeAvailableForCart(time, cartPizzaCount = PizzaMan.pizzaCount({ items: state.cart })) {
-    return PizzaMan.isValidOrderSlot(time) && PizzaMan.canFitInSlot(state.slotUsage, time, Math.max(1, cartPizzaCount));
-  }
-
-  async function refreshSlotUsage() {
-    try {
-      const usageRows = window.PizzaManDb ? await PizzaManDb.listSlotUsage(PizzaMan.todayServiceDate()) : [];
-      state.slotUsage = new Map(usageRows.map((row) => [row.slot, row.pizzaCount]));
-      state.slotUsageLoaded = true;
-      renderTimeSlots();
-      renderCart();
-    } catch (error) {
-      state.slotUsage = new Map();
-      state.slotUsageLoaded = true;
-      renderTimeSlots();
-      renderCart();
+    if (selectedTime && !selectedStillAvailable) {
+      setFeedback("L'heure choisie est passée. Choisis un nouveau créneau.");
     }
   }
 
@@ -187,8 +147,6 @@
     const name = PizzaMan.escapeHtml(item.name);
     const description = PizzaMan.escapeHtml(item.description);
     const price = PizzaMan.formatPriceRange(item);
-    const canCustomize =
-      PizzaMan.getAvailableSizes(item).length > 1 || PizzaMan.allowsExtras(item) || PizzaMan.allowsModification(item);
     const imageAlt = item.type === "drink" ? name : `Pizza ${name}`;
 
     return `
@@ -200,16 +158,7 @@
             <span class="price-pill">${price}</span>
           </div>
           <p>${description}</p>
-          <div class="pizza-actions ${canCustomize ? "" : "single-action"}">
-            ${
-              canCustomize
-                ? `<button class="icon-button" type="button" data-edit-pizza="${PizzaMan.escapeHtml(
-                    item.id,
-                  )}" aria-label="Personnaliser ${name}">
-                    <i data-lucide="pencil" aria-hidden="true"></i>
-                  </button>`
-                : ""
-            }
+          <div class="pizza-actions single-action">
             <button class="primary-action" type="button" data-add-pizza="${PizzaMan.escapeHtml(item.id)}">
               <i data-lucide="plus" aria-hidden="true"></i>
               Ajouter
@@ -256,11 +205,18 @@
       .join("");
   }
 
+  function updateExtrasToggleLabel() {
+    if (!extrasToggle) return;
+    const count = state.selectedExtras.size;
+    extrasToggle.querySelector(".extras-toggle-count").textContent =
+      count > 0 ? `${count} sélectionné${count > 1 ? "s" : ""}` : "Aucun";
+  }
+
   function bindEvents() {
     menuGrid.addEventListener("click", (event) => {
-      const button = event.target.closest("button[data-add-pizza], button[data-edit-pizza]");
+      const button = event.target.closest("button[data-add-pizza]");
       if (!button) return;
-      openDialog(button.dataset.addPizza || button.dataset.editPizza);
+      openDialog(button.dataset.addPizza);
     });
 
     sizeControl.addEventListener("click", (event) => {
@@ -319,25 +275,18 @@
 
       if (removeButton) {
         state.cart.splice(Number(removeButton.dataset.removeItem), 1);
-        renderTimeSlots();
         renderCart();
       }
     });
 
     customerForm.addEventListener("input", () => {
-      renderTimeSlots();
       renderCart();
     });
     customerForm.addEventListener("change", () => {
       updateCustomerRequirements();
-      renderTimeSlots();
       renderCart();
     });
     orderButton.addEventListener("click", orderWithSms);
-    copyMessageButton?.addEventListener("click", copyMessage);
-    copyOrderLinkButton?.addEventListener("click", copyPizzeriaLink);
-    whatsappLink?.addEventListener("click", (event) => sendMessageLink(event, "whatsapp"));
-    smsLink?.addEventListener("click", (event) => sendMessageLink(event, "sms"));
 
     mobileCartJump.addEventListener("click", () => {
       document.querySelector("#commande").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -385,6 +334,9 @@
 
     renderSizeControl(item);
     renderExtras(item);
+    if (extrasField && extrasField.tagName === "DETAILS") {
+      extrasField.open = state.selectedExtras.size > 0;
+    }
     updateDialogState();
     dialog.showModal();
     refreshIcons();
@@ -422,6 +374,8 @@
       input.closest(".extra-option").classList.toggle("is-disabled", input.disabled);
     });
 
+    updateExtrasToggleLabel();
+
     quantityValue.textContent = state.quantity;
     const tempItem = {
       pizzaId: state.selectedPizzaId,
@@ -452,7 +406,6 @@
     }
 
     dialog.close();
-    renderTimeSlots();
     renderCart();
   }
 
@@ -468,22 +421,10 @@
   }
 
   function getCurrentOrder() {
-    if (state.cart.length && !state.orderMeta) {
-      const now = new Date();
-      state.orderMeta = {
-        id: PizzaMan.createOrderId(now),
-        createdAt: now.toISOString(),
-      };
-    }
-
-    return PizzaMan.createOrder(state.cart, getCustomer(), state.orderMeta || {});
+    return PizzaMan.createOrder(state.cart, getCustomer());
   }
 
   function renderCart() {
-    if (!state.cart.length) {
-      state.orderMeta = null;
-    }
-
     emptyCart.hidden = state.cart.length > 0;
     cartItems.innerHTML = state.cart
       .map((item, index) => {
@@ -497,17 +438,17 @@
         const size = PizzaMan.escapeHtml(PizzaMan.sizeLabel(item.size, menuItem));
         const extrasLabel = PizzaMan.escapeHtml(extras);
         const modification = PizzaMan.escapeHtml(item.modification || "");
-        const details = [size, extrasLabel ? `Suppléments: ${extrasLabel}` : ""].filter(Boolean).join(" - ");
         return `
           <article class="cart-item">
             <div class="cart-item-head">
               <div>
                 <h3>${item.quantity}x ${itemName}</h3>
-                ${details ? `<p>${details}</p>` : ""}
+                ${size ? `<p>${size}</p>` : ""}
+                ${extrasLabel ? `<p><strong>Suppléments: ${extrasLabel}</strong></p>` : ""}
               </div>
               <strong>${PizzaMan.formatMoney(PizzaMan.itemTotal(item))}</strong>
             </div>
-            ${modification ? `<p>Modification: ${modification}</p>` : ""}
+            ${modification ? `<p><strong>Modification: ${modification}</strong></p>` : ""}
             <div class="cart-item-actions">
               <button class="icon-button" type="button" data-edit-item="${index}" aria-label="Modifier cet article">
                 <i data-lucide="pencil" aria-hidden="true"></i>
@@ -524,26 +465,15 @@
     const order = getCurrentOrder();
     const total = PizzaMan.orderTotal(order);
     const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
-    const pizzeriaLink = state.cart.length > 0 && !deliveryWarning ? PizzaMan.buildPizzeriaLink(order) : "";
     const clientMessage =
       state.cart.length > 0
-        ? [PizzaMan.formatOrderMessage(order), pizzeriaLink ? `Lien pizzeria: ${pizzeriaLink}` : ""]
-            .filter(Boolean)
-            .join("\n\n")
+        ? PizzaMan.formatOrderMessage(order)
         : "Ajoute un article pour générer le message de commande.";
     cartTotal.textContent = PizzaMan.formatMoney(total);
     messageOutput.value = clientMessage;
     deliveryMinimumWarning.textContent = deliveryWarning;
     deliveryMinimumWarning.hidden = !deliveryWarning;
 
-    const encodedMessage = encodeURIComponent(messageOutput.value);
-    if (whatsappLink) {
-      whatsappLink.href =
-        state.cart.length > 0 && !deliveryWarning ? `${PizzaMan.business.whatsappHref}?text=${encodedMessage}` : "#";
-    }
-    if (smsLink) {
-      smsLink.href = state.cart.length > 0 && !deliveryWarning ? buildSmsHref(messageOutput.value) : "#";
-    }
     const articleCount = PizzaMan.articleCount(order);
     cartCount.textContent = `${articleCount} article${articleCount > 1 ? "s" : ""}`;
     mobileCartLabel.textContent =
@@ -551,88 +481,6 @@
 
     updateMobileCartJumpVisibility();
     refreshIcons();
-  }
-
-  async function persistCurrentOrder() {
-    if (!state.cart.length) {
-      setFeedback("Ajoute au moins un article avant d'envoyer la commande.");
-      return null;
-    }
-
-    updateCustomerRequirements();
-    if (!customerForm.reportValidity()) {
-      setFeedback("Renseigne les champs obligatoires avant d'envoyer la commande.");
-      return null;
-    }
-
-    await refreshSlotUsage();
-
-    const order = getCurrentOrder();
-    if (order.customer.desiredTime && !PizzaMan.isValidOrderSlot(order.customer.desiredTime)) {
-      setFeedback("Choisis une heure entre 17h00 et 21h30, par tranche de 15 minutes.");
-      return null;
-    }
-
-    if (!order.customer.desiredTime) {
-      setFeedback("Choisis une heure pour la commande.");
-      return null;
-    }
-
-    if (!PizzaMan.canFitInSlot(state.slotUsage, order.customer.desiredTime, PizzaMan.pizzaCount(order))) {
-      setFeedback("Ce créneau est complet ou n'a plus assez de place pour cette commande.");
-      renderTimeSlots();
-      return null;
-    }
-
-    const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
-    if (deliveryWarning) {
-      setFeedback(deliveryWarning);
-      return null;
-    }
-
-    try {
-      if (window.PizzaManDb) {
-        await PizzaManDb.saveOrder(order);
-      }
-      return { order, stored: true };
-    } catch (error) {
-      if (String(error && error.message).includes("Créneau complet")) {
-        await refreshSlotUsage();
-        setFeedback("Ce créneau vient d'être rempli. Choisis une autre heure.");
-        return null;
-      }
-      setFeedback("Commande prête, mais l'enregistrement Supabase n'est pas encore disponible.");
-    }
-
-    return { order, stored: false };
-  }
-
-  async function copyText(text, successMessage) {
-    try {
-      await navigator.clipboard.writeText(text);
-      setFeedback(successMessage);
-    } catch (error) {
-      setFeedback("Copie impossible automatiquement. Sélectionne le texte et copie-le manuellement.");
-    }
-  }
-
-  async function copyMessage() {
-    const result = await persistCurrentOrder();
-    if (!result) return;
-    copyText(
-      messageOutput.value,
-      result.stored ? "Message copié et commande enregistrée." : "Message copié. Supabase à vérifier.",
-    );
-  }
-
-  async function copyPizzeriaLink() {
-    const result = await persistCurrentOrder();
-    if (!result) return;
-    const link = PizzaMan.buildPizzeriaLink(getCurrentOrder());
-    copyText(
-      link,
-      result.stored ? "Lien pizzeria copié et commande enregistrée." : "Lien pizzeria copié. Supabase à vérifier.",
-    );
   }
 
   function buildSmsHref(message) {
@@ -643,42 +491,42 @@
     return `${PizzaMan.business.smsHref}${separator}body=${encodeURIComponent(message)}`;
   }
 
-  async function orderWithSms() {
+  function orderWithSms() {
     if (!state.cart.length) {
       setFeedback("Ajoute au moins un article avant d'envoyer la commande.");
       return;
     }
 
-    const result = await persistCurrentOrder();
-    if (!result) {
+    updateCustomerRequirements();
+    if (!customerForm.reportValidity()) {
+      setFeedback("Renseigne les champs obligatoires avant d'envoyer la commande.");
+      return;
+    }
+
+    const order = getCurrentOrder();
+    if (!order.customer.desiredTime) {
+      setFeedback("Choisis une heure pour la commande.");
+      return;
+    }
+
+    if (!PizzaMan.isValidOrderSlot(order.customer.desiredTime)) {
+      setFeedback("Choisis une heure entre 17h00 et 21h30, par tranche de 15 minutes.");
+      return;
+    }
+
+    if (PizzaMan.isSlotInPast(order.customer.desiredTime)) {
+      setFeedback("L'heure choisie est déjà passée. Choisis un nouveau créneau.");
+      renderTimeSlots();
+      return;
+    }
+
+    const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
+    if (deliveryWarning) {
+      setFeedback(deliveryWarning);
       return;
     }
 
     window.location.href = buildSmsHref(messageOutput.value);
-  }
-
-  async function sendMessageLink(event, target) {
-    if (!state.cart.length) {
-      event.preventDefault();
-      setFeedback("Ajoute au moins un article avant d'envoyer la commande.");
-      return;
-    }
-
-    event.preventDefault();
-    const popup = target === "whatsapp" ? window.open("about:blank", "_blank", "noreferrer") : null;
-    const result = await persistCurrentOrder();
-    if (!result) {
-      if (popup) popup.close();
-      return;
-    }
-
-    const href = target === "whatsapp" ? whatsappLink.href : smsLink.href;
-    if (popup) {
-      popup.location.href = href;
-      return;
-    }
-
-    window.location.href = href;
   }
 
   function setFeedback(message) {
