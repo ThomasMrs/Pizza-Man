@@ -323,7 +323,13 @@ a {
 .pizza-card-body {
   display: grid;
   gap: 12px;
+  min-width: 0;
   padding: 15px;
+}
+
+.pizza-card-body p,
+.pizza-card-body h3 {
+  overflow-wrap: anywhere;
 }
 
 .pizza-card-title {
@@ -608,6 +614,9 @@ textarea:focus {
   color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .action-grid {
@@ -871,7 +880,7 @@ fieldset {
   .order-layout,
   .dialog-card,
   .business-strip {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .intro-status {
@@ -908,6 +917,35 @@ fieldset {
   .intro-band {
     min-height: 340px;
     align-content: end;
+    padding: 30px 16px;
+  }
+
+  .intro-band h1 {
+    font-size: clamp(1.8rem, 8vw, 2.4rem);
+  }
+
+  .intro-band p {
+    font-size: 0.95rem;
+  }
+
+  .intro-status {
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    font-size: 0.85rem;
+    line-height: 1.35;
+  }
+
+  .business-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .business-strip div,
+  .business-strip a {
+    min-height: 52px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    text-align: left;
   }
 
   .order-layout {
@@ -916,7 +954,7 @@ fieldset {
 
   .category-grid,
   .extras-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .pizza-card p {
