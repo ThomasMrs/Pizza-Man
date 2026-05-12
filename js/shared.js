@@ -411,8 +411,10 @@
 
   function isSlotInPast(time, now = new Date()) {
     const value = timeToMinutes(time);
-    if (value === null) return true;
+    const end = timeToMinutes(business.orderEndTime);
+    if (value === null || end === null) return true;
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    if (currentMinutes > end) return false;
     return value <= currentMinutes;
   }
 
