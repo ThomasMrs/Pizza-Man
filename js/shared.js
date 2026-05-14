@@ -343,7 +343,7 @@
     },
   ];
 
-  const pizzaImages = {
+  const menuImages = {
     margarita: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=900&q=80",
     regina: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?auto=format&fit=crop&w=900&q=80",
     complete: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=900&q=80",
@@ -370,11 +370,16 @@
     kebab: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=80",
     "super-magret": "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=900&q=80",
     "choco-banane": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80",
+    "vin-deprade-jorda": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=900&q=80",
+    lambrusco: "https://images.unsplash.com/photo-1586370434639-0fe43b2d32e6?auto=format&fit=crop&w=900&q=80",
+    "coca-125": "https://images.unsplash.com/photo-1561758033-48d52648ae8b?auto=format&fit=crop&w=900&q=80",
+    canettes: "https://images.unsplash.com/photo-1527960471264-932f39eb5846?auto=format&fit=crop&w=900&q=80",
+    "despe-33": "https://images.unsplash.com/photo-1566595008424-ae205712214d?auto=format&fit=crop&w=900&q=80",
   };
 
   menu.forEach((item) => {
-    if (item.type === "pizza" && pizzaImages[item.id]) {
-      item.image = pizzaImages[item.id];
+    if (menuImages[item.id]) {
+      item.image = menuImages[item.id];
     }
   });
 
