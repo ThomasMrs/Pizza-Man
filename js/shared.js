@@ -371,10 +371,10 @@
     "super-magret": "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=900&q=80",
     "choco-banane": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80",
     "vin-deprade-jorda": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=900&q=80",
-    lambrusco: "assets/photos/lambrusco.jpg",
+    lambrusco: "assets/photos/lambrusco.png",
     "coca-125": "assets/photos/coca-125.jpg",
     canettes: "assets/photos/canettes.jpg",
-    "despe-33": "assets/photos/despe-33.jpg",
+    "despe-33": "assets/photos/despe-33.png",
   };
 
   menu.forEach((item) => {
