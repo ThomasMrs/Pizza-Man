@@ -709,8 +709,8 @@ textarea:focus {
 }
 
 .bottom-bar-order[disabled] {
-  background: var(--muted);
-  color: rgba(255, 253, 248, 0.7);
+  color: var(--muted);
+  background: rgba(110, 98, 86, 0.12);
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -729,7 +729,7 @@ textarea:focus {
 }
 
 .bottom-bar-count.is-empty {
-  background: var(--muted);
+  display: none;
 }
 
 .bottom-bar-total {
