@@ -125,10 +125,7 @@
             </label>
           </form>
 
-          <div class="message-preview">
-            <label for="message-output">Message généré</label>
-            <textarea id="message-output" rows="9" readonly></textarea>
-          </div>
+          <textarea id="message-output" rows="9" readonly hidden></textarea>
 
           <button class="primary-action full-width" id="order-button" type="button">
             <i data-lucide="send" aria-hidden="true"></i>
@@ -140,10 +137,17 @@
       </section>
     </main>
 
-    <button class="mobile-cart-jump" id="mobile-cart-jump" type="button">
-      <i data-lucide="shopping-cart" aria-hidden="true"></i>
-      <span id="mobile-cart-label">Voir la commande</span>
-    </button>
+    <div class="bottom-bar" id="bottom-bar" aria-label="Actions panier">
+      <button class="bottom-bar-cart" id="bottom-bar-cart" type="button">
+        <i data-lucide="shopping-cart" aria-hidden="true"></i>
+        <span class="bottom-bar-count is-empty" id="bottom-bar-count">0</span>
+        <span class="bottom-bar-total" id="bottom-bar-total">0,00 €</span>
+      </button>
+      <button class="bottom-bar-order" id="bottom-bar-order" type="button" disabled>
+        <i data-lucide="send" aria-hidden="true"></i>
+        Commander
+      </button>
+    </div>
 
     <dialog class="pizza-dialog" id="pizza-dialog">
       <form method="dialog" class="dialog-card" id="pizza-form">

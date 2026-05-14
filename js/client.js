@@ -23,8 +23,10 @@
   const orderButton = document.querySelector("#order-button");
   const feedback = document.querySelector("#client-feedback");
   const deliveryMinimumWarning = document.querySelector("#delivery-minimum-warning");
-  const mobileCartJump = document.querySelector("#mobile-cart-jump");
-  const mobileCartLabel = document.querySelector("#mobile-cart-label");
+  const bottomBarCart = document.querySelector("#bottom-bar-cart");
+  const bottomBarOrder = document.querySelector("#bottom-bar-order");
+  const bottomBarCount = document.querySelector("#bottom-bar-count");
+  const bottomBarTotal = document.querySelector("#bottom-bar-total");
   const dialog = document.querySelector("#pizza-dialog");
   const pizzaForm = document.querySelector("#pizza-form");
   const dialogImage = document.querySelector("#dialog-image");
@@ -50,7 +52,6 @@
     renderOpeningStatus();
     renderCart();
     bindEvents();
-    setupMobileCartVisibility();
     window.setInterval(() => {
       renderOpeningStatus();
       renderTimeSlots();
@@ -305,31 +306,11 @@
     });
     orderButton.addEventListener("click", orderWithSms);
 
-    mobileCartJump.addEventListener("click", () => {
+    bottomBarCart.addEventListener("click", () => {
       document.querySelector("#commande").scrollIntoView({ behavior: "smooth", block: "start" });
     });
-  }
 
-  function setupMobileCartVisibility() {
-    const cartPanel = document.querySelector("#commande");
-    if (!cartPanel || !mobileCartJump) return;
-
-    updateMobileCartJumpVisibility();
-    window.addEventListener("scroll", updateMobileCartJumpVisibility, { passive: true });
-    window.addEventListener("resize", updateMobileCartJumpVisibility);
-    cartPanel.addEventListener("focusin", () => mobileCartJump.classList.add("is-hidden"));
-    cartPanel.addEventListener("pointerdown", () => mobileCartJump.classList.add("is-hidden"));
-  }
-
-  function updateMobileCartJumpVisibility() {
-    const cartPanel = document.querySelector("#commande");
-    if (!cartPanel || !mobileCartJump) return;
-
-    const isMobile = window.matchMedia("(max-width: 720px)").matches;
-    const rect = cartPanel.getBoundingClientRect();
-    const cartVisible = rect.top < window.innerHeight - 64 && rect.bottom > 96;
-    const shouldHide = !isMobile || !state.cart.length || cartVisible;
-    mobileCartJump.classList.toggle("is-hidden", shouldHide);
+    bottomBarOrder.addEventListener("click", orderWithSms);
   }
 
   function openDialog(pizzaId, editingIndex = null) {
@@ -522,10 +503,12 @@
 
     const articleCount = PizzaMan.articleCount(order);
     cartCount.textContent = `${articleCount} article${articleCount > 1 ? "s" : ""}`;
-    mobileCartLabel.textContent =
-      articleCount > 0 ? `${articleCount} article(s) - ${PizzaMan.formatMoney(total)}` : "Voir la commande";
 
-    updateMobileCartJumpVisibility();
+    bottomBarCount.textContent = articleCount;
+    bottomBarCount.classList.toggle("is-empty", articleCount === 0);
+    bottomBarTotal.textContent = PizzaMan.formatMoney(total);
+    bottomBarOrder.disabled = articleCount === 0;
+
     refreshIcons();
   }
 
