@@ -308,11 +308,16 @@ a {
 }
 
 .pizza-card {
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--paper);
   box-shadow: 0 12px 28px rgba(31, 27, 23, 0.08);
+}
+
+.menu-column {
+  min-width: 0;
 }
 
 .pizza-card img {
@@ -436,6 +441,7 @@ a {
   align-self: start;
   display: grid;
   gap: 16px;
+  min-width: 0;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -466,11 +472,13 @@ a {
 .cart-items {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .cart-item {
   display: grid;
   gap: 6px;
+  min-width: 0;
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -482,16 +490,20 @@ a {
   justify-content: space-between;
   gap: 12px;
   align-items: flex-start;
+  min-width: 0;
 }
 
 .cart-item h3 {
   margin: 0;
+  min-width: 0;
   color: var(--green-dark);
   font-size: 0.98rem;
   line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .cart-item strong {
+  flex: 0 0 auto;
   white-space: nowrap;
 }
 
@@ -500,6 +512,8 @@ a {
   color: var(--muted);
   font-size: 0.84rem;
   line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .cart-item-controls {
