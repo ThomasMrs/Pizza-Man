@@ -343,6 +343,41 @@
     },
   ];
 
+  const pizzaImages = {
+    margarita: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=900&q=80",
+    regina: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?auto=format&fit=crop&w=900&q=80",
+    complete: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=900&q=80",
+    royale: "https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?auto=format&fit=crop&w=900&q=80",
+    roquefort: "https://images.unsplash.com/photo-1593504049359-74330189a345?auto=format&fit=crop&w=900&q=80",
+    "4-fromages": "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=900&q=80",
+    reblochonne: "https://images.unsplash.com/photo-1555072956-7758afb20e8f?auto=format&fit=crop&w=900&q=80",
+    raclette: "https://images.unsplash.com/photo-1571066811602-716837d681de?auto=format&fit=crop&w=900&q=80",
+    sicilienne: "https://images.unsplash.com/photo-1652952561151-97e82f26c336?auto=format&fit=crop&w=900&q=80",
+    catalane: "https://images.unsplash.com/photo-1614442316719-1e38c661c29c?auto=format&fit=crop&w=900&q=80",
+    norvegienne: "https://images.unsplash.com/photo-1718724587928-8d98db46139b?auto=format&fit=crop&w=900&q=80",
+    chorizo: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=900&q=80",
+    "super-chorizo": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=80",
+    "super-chef": "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=900&q=80",
+    "royal-merguez": "https://images.unsplash.com/photo-1613564834361-9436948817d1?auto=format&fit=crop&w=900&q=80",
+    campagnarde: "https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&w=900&q=80",
+    forestiere: "https://images.unsplash.com/photo-1528137871618-79d2761e3fd5?auto=format&fit=crop&w=900&q=80",
+    popolino: "https://images.unsplash.com/photo-1611915365928-565c527a0590?auto=format&fit=crop&w=900&q=80",
+    hawaienne: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&q=80",
+    "chevre-miel": "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80",
+    "reblo-miel": "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=900&q=80",
+    vegetarienne: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=900&q=80",
+    bbq: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=900&q=80",
+    kebab: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=80",
+    "super-magret": "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=900&q=80",
+    "choco-banane": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80",
+  };
+
+  menu.forEach((item) => {
+    if (item.type === "pizza" && pizzaImages[item.id]) {
+      item.image = pizzaImages[item.id];
+    }
+  });
+
   const extras = [
     { id: "emmental", name: "Emmental" },
     { id: "mozzarella", name: "Mozzarella" },
