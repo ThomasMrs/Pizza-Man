@@ -371,10 +371,10 @@
     "super-magret": "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=900&q=80",
     "choco-banane": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80",
     "vin-deprade-jorda": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=900&q=80",
-    lambrusco: "https://commons.wikimedia.org/wiki/Special:FilePath/Lambrusco.jpg?width=900",
-    "coca-125": "https://commons.wikimedia.org/wiki/Special:FilePath/Coca-Cola%20Bottle.jpg?width=900",
-    canettes: "https://images.unsplash.com/photo-1527960471264-932f39eb5846?auto=format&fit=crop&w=900&q=80",
-    "despe-33": "https://commons.wikimedia.org/wiki/Special:FilePath/Desperados.jpg?width=900",
+    lambrusco: "assets/photos/lambrusco.jpg",
+    "coca-125": "assets/photos/coca-125.jpg",
+    canettes: "assets/photos/canettes.jpg",
+    "despe-33": "assets/photos/despe-33.jpg",
   };
 
   menu.forEach((item) => {
