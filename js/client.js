@@ -436,7 +436,6 @@
     const formData = new FormData(customerForm);
     return {
       name: String(formData.get("name") || "").trim(),
-      phone: String(formData.get("phone") || "").trim(),
       mode: String(formData.get("mode") || "À emporter"),
       desiredTime: String(formData.get("desiredTime") || "").trim(),
       address: String(formData.get("address") || "").trim(),

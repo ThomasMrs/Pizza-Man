@@ -629,7 +629,6 @@
       status: "À faire",
       customer: {
         name: customer.name || "",
-        phone: customer.phone || "",
         mode: customer.mode || "À emporter",
         address: customer.address || "",
         desiredTime: customer.desiredTime || "",
@@ -692,7 +691,6 @@
       `🍕 Commande Pizza'Man`,
       "",
       `👤 ${customer.name || "Non renseigné"}`,
-      `📞 ${customer.phone || "Non renseigné"}`,
       `${modeEmoji(customer.mode)} ${customer.mode || "À emporter"}`,
       customer.desiredTime ? `🕐 ${formatTimeLabel(customer.desiredTime)}` : "",
       customer.address ? `📍 ${customer.address}` : "",
