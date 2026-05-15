@@ -645,27 +645,13 @@
     };
   }
 
-  function modeEmoji(mode) {
-    return mode === "Livraison" ? "🚗" : "🥡";
-  }
-
-  function menuItemEmoji(menuItem) {
-    if (!menuItem || menuItem.type !== "drink") return "";
-    const id = menuItem.id || "";
-    if (id.includes("vin") || id.includes("lambrusco")) return "🍷";
-    if (id.includes("despe")) return "🍺";
-    return "🥤";
-  }
-
   function formatOrderItemLines(item) {
     const menuItem = getMenuItem(item.pizzaId);
     if (!menuItem) return ["- Article inconnu"];
 
     const size = sizeLabel(item.size, menuItem);
     const total = formatMoney(itemTotal(item));
-    const emoji = menuItemEmoji(menuItem);
-    const prefix = emoji ? `${emoji} ` : "- ";
-    const header = `${prefix}${item.quantity || 1}x ${menuItem.name}${size ? ` - ${size}` : ""} (${total})`;
+    const header = `- ${item.quantity || 1}x ${menuItem.name}${size ? ` - ${size}` : ""} (${total})`;
     const lines = [header];
 
     const extraLabels = allowsExtras(menuItem)
@@ -693,24 +679,24 @@
     const itemLines = (order.items || []).flatMap(formatOrderItemLines);
     const subtotals = categorySubtotals(order);
     const lines = [
-      `🍕 Commande Pizza'Man`,
+      `Commande Pizza'Man`,
       "",
-      `👤 ${customer.name || "Non renseigné"}`,
-      `${modeEmoji(customer.mode)} ${customer.mode || "À emporter"}`,
-      customer.desiredTime ? `🕐 ${formatTimeLabel(customer.desiredTime)}` : "",
-      customer.address ? `📍 ${customer.address}` : "",
+      `Client: ${customer.name || "Non renseigné"}`,
+      `Mode: ${customer.mode || "À emporter"}`,
+      customer.desiredTime ? `Heure: ${formatTimeLabel(customer.desiredTime)}` : "",
+      customer.address ? `Adresse: ${customer.address}` : "",
       deliveryWarning ? `⚠️ ${deliveryWarning}` : "",
       "",
       "Articles:",
       ...itemLines,
-      delivery ? `🚗 Frais livraison: ${formatMoney(delivery)}` : "",
+      delivery ? `Frais livraison: ${formatMoney(delivery)}` : "",
       "",
       subtotals.pizzas > 0 || delivery > 0
-        ? `🍕 Total pizzas${delivery > 0 ? " + livraison" : ""}: ${formatMoney(subtotals.pizzas + delivery)}`
+        ? `Total pizzas${delivery > 0 ? " + livraison" : ""}: ${formatMoney(subtotals.pizzas + delivery)}`
         : "",
-      subtotals.drinks > 0 ? `🥤 Total boissons: ${formatMoney(subtotals.drinks)}` : "",
-      subtotals.wines > 0 ? `🍷 Total vins: ${formatMoney(subtotals.wines)}` : "",
-      `💰 Total: ${formatMoney(orderTotal(order))}`,
+      subtotals.drinks > 0 ? `Total boissons: ${formatMoney(subtotals.drinks)}` : "",
+      subtotals.wines > 0 ? `Total vins: ${formatMoney(subtotals.wines)}` : "",
+      `Total: ${formatMoney(orderTotal(order))}`,
     ];
 
     return lines.filter((line, index) => line !== "" || lines[index - 1] !== "").join("\n");
