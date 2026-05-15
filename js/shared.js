@@ -24,7 +24,7 @@
 
   const config = {
     currency: "EUR",
-    modificationPrice: 0.5,
+    modificationPrice: 0.2,
     supplementPrices: {
       small: 1,
       large: 1.5,

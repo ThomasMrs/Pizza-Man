@@ -31,7 +31,7 @@ suppléments et peut préciser une modification. Le site calcule :
 
 - supplément petite pizza : `1 EUR` ;
 - supplément grande pizza : `1,50 EUR` ;
-- modification : `0,50 EUR` ;
+- modification : `0,20 EUR` ;
 - frais de livraison : `4 EUR` si le client choisit la livraison.
 
 Le client renseigne une heure souhaitée (par tranche de 15 min entre 18h45 et
