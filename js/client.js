@@ -12,6 +12,7 @@
   const emptyCart = document.querySelector("#empty-cart");
   const cartItems = document.querySelector("#cart-items");
   const cartTotal = document.querySelector("#cart-total");
+  const cartSubtotals = document.querySelector("#cart-subtotals");
   const cartCount = document.querySelector("#cart-count");
   const customerForm = document.querySelector("#customer-form");
   const modeSelect = customerForm.querySelector("select[name='mode']");
@@ -28,6 +29,9 @@
   const bottomBarCount = document.querySelector("#bottom-bar-count");
   const bottomBarTotal = document.querySelector("#bottom-bar-total");
   const dialog = document.querySelector("#pizza-dialog");
+  const confirmDialog = document.querySelector("#confirm-dialog");
+  const confirmCancel = document.querySelector("#confirm-cancel");
+  const confirmSend = document.querySelector("#confirm-send");
   const pizzaForm = document.querySelector("#pizza-form");
   const dialogImage = document.querySelector("#dialog-image");
   const dialogTitle = document.querySelector("#dialog-title");
@@ -311,6 +315,12 @@
     });
 
     bottomBarOrder.addEventListener("click", orderWithSms);
+
+    confirmCancel.addEventListener("click", () => confirmDialog.close());
+    confirmSend.addEventListener("click", sendOrderSms);
+    confirmDialog.addEventListener("click", (event) => {
+      if (event.target === confirmDialog) confirmDialog.close();
+    });
   }
 
   function openDialog(pizzaId, editingIndex = null) {
@@ -491,7 +501,28 @@
 
     const order = getCurrentOrder();
     const total = PizzaMan.orderTotal(order);
+    const subtotals = PizzaMan.categorySubtotals(order);
+    const delivery = PizzaMan.deliveryCharge(order);
     const deliveryWarning = PizzaMan.deliveryMinimumWarning(order);
+
+    const subtotalLines = [];
+    if (subtotals.pizzas > 0 || delivery > 0) {
+      const label = delivery > 0 ? "Pizzas + livraison" : "Pizzas";
+      subtotalLines.push({ label, amount: subtotals.pizzas + delivery });
+    }
+    if (subtotals.drinks > 0) {
+      subtotalLines.push({ label: "Boissons", amount: subtotals.drinks });
+    }
+    if (subtotals.wines > 0) {
+      subtotalLines.push({ label: "Vins", amount: subtotals.wines });
+    }
+    cartSubtotals.innerHTML = subtotalLines
+      .map(
+        (line) =>
+          `<div class="cart-subtotal-row"><span>${PizzaMan.escapeHtml(line.label)}</span><strong>${PizzaMan.formatMoney(line.amount)}</strong></div>`,
+      )
+      .join("");
+    cartSubtotals.hidden = subtotalLines.length <= 1;
     const clientMessage =
       state.cart.length > 0
         ? PizzaMan.formatOrderMessage(order)
@@ -555,6 +586,12 @@
       return;
     }
 
+    confirmDialog.showModal();
+    refreshIcons();
+  }
+
+  function sendOrderSms() {
+    confirmDialog.close();
     window.location.href = buildSmsHref(messageOutput.value);
   }
 

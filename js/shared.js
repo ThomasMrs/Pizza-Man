@@ -23,7 +23,7 @@
 
   const config = {
     currency: "EUR",
-    modificationPrice: 0.5,
+    modificationPrice: 0.2,
     supplementPrices: {
       small: 1,
       large: 1.5,
@@ -546,6 +546,27 @@
     return (order.items || []).reduce((total, item) => total + itemTotal(item), 0);
   }
 
+  function isWineDrink(menuItem) {
+    if (!menuItem || menuItem.type !== "drink") return false;
+    const id = menuItem.id || "";
+    return id.includes("vin") || id.includes("lambrusco");
+  }
+
+  function categorySubtotals(order) {
+    let pizzas = 0;
+    let wines = 0;
+    let drinks = 0;
+    (order.items || []).forEach((item) => {
+      const menuItem = getMenuItem(item.pizzaId);
+      const total = itemTotal(item);
+      if (!menuItem) return;
+      if (menuItem.type === "pizza") pizzas += total;
+      else if (isWineDrink(menuItem)) wines += total;
+      else drinks += total;
+    });
+    return { pizzas, wines, drinks };
+  }
+
   function pizzaCount(order) {
     return (order.items || []).reduce((count, item) => {
       const menuItem = getMenuItem(item.pizzaId);
@@ -705,6 +726,7 @@
     itemUnitPrice,
     itemTotal,
     itemsSubtotal,
+    categorySubtotals,
     pizzaCount,
     articleCount,
     isValidOrderSlot,

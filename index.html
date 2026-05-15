@@ -82,6 +82,8 @@
 
           <div class="cart-items" id="cart-items"></div>
 
+          <div class="cart-subtotals" id="cart-subtotals" aria-live="polite"></div>
+
           <div class="cart-total" aria-live="polite">
             <span>Total</span>
             <strong id="cart-total">0,00 EUR</strong>
@@ -137,6 +139,26 @@
       </section>
     </main>
 
+    <dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title">
+      <div class="confirm-card">
+        <div class="confirm-icon">
+          <i data-lucide="send" aria-hidden="true"></i>
+        </div>
+        <h2 id="confirm-title">Confirme ta commande</h2>
+        <p>
+          Ton appli SMS va s'ouvrir avec le message de commande prêt à envoyer.
+          <strong>La commande ne sera prise en compte qu'une fois le SMS envoyé à la pizzeria.</strong>
+        </p>
+        <div class="confirm-actions">
+          <button class="secondary-action" id="confirm-cancel" type="button">Annuler</button>
+          <button class="primary-action" id="confirm-send" type="button">
+            <i data-lucide="send" aria-hidden="true"></i>
+            Ouvrir le SMS
+          </button>
+        </div>
+      </div>
+    </dialog>
+
     <div class="bottom-bar" id="bottom-bar" aria-label="Actions panier">
       <button class="bottom-bar-cart" id="bottom-bar-cart" type="button">
         <i data-lucide="shopping-cart" aria-hidden="true"></i>
@@ -182,9 +204,9 @@
             <textarea
               id="modification-input"
               rows="3"
-              placeholder="Ex: sans olives, bien cuite, moins de fromage..."
+              placeholder="Ex: sans olives, moins de fromage..."
             ></textarea>
-            <span class="option-note">Toute modification ajoute 0,50 EUR par pizza.</span>
+            <span class="option-note">Toute modification ajoute 0,20 EUR par pizza.</span>
           </label>
 
           <div class="quantity-row">

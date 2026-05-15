@@ -566,6 +566,26 @@ a {
   width: 36px;
 }
 
+.cart-subtotals {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.cart-subtotal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.cart-subtotal-row strong {
+  color: var(--ink);
+  font-weight: 850;
+}
+
 .cart-total {
   display: flex;
   justify-content: space-between;
@@ -653,6 +673,64 @@ textarea:focus {
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.35;
+}
+
+.confirm-dialog {
+  width: min(440px, calc(100vw - 26px));
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  background: transparent;
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(31, 27, 23, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.confirm-card {
+  display: grid;
+  gap: 12px;
+  padding: 24px 22px 18px;
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.confirm-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 4px;
+  border-radius: 999px;
+  color: var(--green-dark);
+  background: rgba(14, 91, 63, 0.12);
+}
+
+.confirm-card h2 {
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 1.3rem;
+}
+
+.confirm-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.confirm-card p strong {
+  color: var(--red-dark);
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 .bottom-bar {
@@ -748,6 +826,11 @@ textarea:focus {
 .pizza-dialog::backdrop {
   background: rgba(31, 27, 23, 0.48);
   backdrop-filter: blur(3px);
+}
+
+body:has(.pizza-dialog[open]) .bottom-bar,
+body:has(.confirm-dialog[open]) .bottom-bar {
+  visibility: hidden;
 }
 
 .dialog-card {
