@@ -14,6 +14,7 @@
     deliveryFee: 4,
     deliveryMinimum: 2,
     maxExtrasPerPizza: Infinity,
+    orderDays: [2, 3, 4, 5, 6],
     orderStartTime: "18:45",
     orderEndTime: "21:30",
     orderSlotMinutes: 15,
@@ -23,7 +24,7 @@
 
   const config = {
     currency: "EUR",
-    modificationPrice: 0.2,
+    modificationPrice: 0.5,
     supplementPrices: {
       small: 1,
       large: 1.5,
@@ -429,6 +430,10 @@
     return `${padTimePart(Math.floor(minutes / 60))}:${padTimePart(minutes % 60)}`;
   }
 
+  function isOrderDay(date = new Date()) {
+    return business.orderDays.includes(date.getDay());
+  }
+
   function isValidOrderSlot(time) {
     const value = timeToMinutes(time);
     const start = timeToMinutes(business.orderStartTime);
@@ -733,6 +738,7 @@
     categorySubtotals,
     pizzaCount,
     articleCount,
+    isOrderDay,
     isValidOrderSlot,
     orderTimeSlots,
     isSlotInPast,

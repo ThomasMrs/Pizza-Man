@@ -7,7 +7,7 @@ SMS à la pizzeria.
 ## Informations intégrées
 
 - Adresse : 8 Route Nationale 115, 66490 Saint-Jean-Pla-de-Corts.
-- Horaires : mardi au samedi, 17h à 21h30.
+- Horaires : mardi au samedi, 18h45 à 21h30.
 - Commandes par SMS : `06-46-57-63-69`.
 - Facebook : <https://www.facebook.com/pizzaman.stjean/?ref=page_internal>
 - Google : <https://share.google/MiNwfMVDMd9wwK8vd>
@@ -34,7 +34,7 @@ suppléments et peut préciser une modification. Le site calcule :
 - modification : `0,50 EUR` ;
 - frais de livraison : `4 EUR` si le client choisit la livraison.
 
-Le client renseigne une heure souhaitée (par tranche de 15 min entre 17h00 et
+Le client renseigne une heure souhaitée (par tranche de 15 min entre 18h45 et
 21h30). Les créneaux déjà passés sont automatiquement masqués. Quand il valide,
 son téléphone ouvre l'application SMS avec le message préremplie pour la
 pizzeria.

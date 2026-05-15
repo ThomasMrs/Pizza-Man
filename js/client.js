@@ -84,11 +84,15 @@
 
     const selectedTime = desiredTimeSelect.value;
     const now = new Date();
-    const slots = PizzaMan.orderTimeSlots().filter((time) => !PizzaMan.isSlotInPast(time, now));
+    const isOrderDay = PizzaMan.isOrderDay(now);
+    const slots = isOrderDay
+      ? PizzaMan.orderTimeSlots().filter((time) => !PizzaMan.isSlotInPast(time, now))
+      : [];
     const selectedStillAvailable = selectedTime && slots.includes(selectedTime);
 
+    desiredTimeSelect.disabled = !isOrderDay;
     desiredTimeSelect.innerHTML = [
-      '<option value="">Choisir une heure</option>',
+      `<option value="">${isOrderDay ? "Choisir une heure" : "Fermé aujourd'hui"}</option>`,
       ...slots.map(
         (time) =>
           `<option value="${PizzaMan.escapeHtml(time)}" ${
@@ -97,7 +101,7 @@
       ),
     ].join("");
 
-    if (selectedTime && !selectedStillAvailable) {
+    if (isOrderDay && selectedTime && !selectedStillAvailable) {
       setFeedback("L'heure choisie est passée. Choisis un nouveau créneau.");
     }
   }
@@ -106,11 +110,10 @@
     if (!openingStatus || !openingStatusLabel) return;
 
     const now = new Date();
-    const day = now.getDay();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     const [startHours, startMinutes] = PizzaMan.business.orderStartTime.split(":").map(Number);
     const [endHours, endMinutes] = PizzaMan.business.orderEndTime.split(":").map(Number);
-    const opensToday = day >= 2 && day <= 6;
+    const opensToday = PizzaMan.isOrderDay(now);
     const start = startHours * 60 + startMinutes;
     const end = endHours * 60 + endMinutes;
     const isOpen = opensToday && currentMinutes >= start && currentMinutes <= end;
@@ -461,7 +464,6 @@
         const extrasLabel = PizzaMan.escapeHtml(extras);
         const modification = PizzaMan.escapeHtml(item.modification || "");
         const titleLine = size ? `${itemName} · ${size}` : `${itemName}`;
-        const hasCustomization = Boolean(extrasLabel || modification);
         return `
           <article class="cart-item">
             <div class="cart-item-header">
@@ -481,13 +483,9 @@
                 </button>
               </div>
               <div class="cart-item-icons">
-                ${
-                  hasCustomization
-                    ? `<button class="icon-button" type="button" data-edit-item="${index}" aria-label="Modifier cet article">
-                        <i data-lucide="pencil" aria-hidden="true"></i>
-                      </button>`
-                    : ""
-                }
+                <button class="icon-button" type="button" data-edit-item="${index}" aria-label="Modifier cet article">
+                  <i data-lucide="pencil" aria-hidden="true"></i>
+                </button>
                 <button class="icon-button" type="button" data-remove-item="${index}" aria-label="Retirer cet article">
                   <i data-lucide="trash-2" aria-hidden="true"></i>
                 </button>
@@ -553,6 +551,12 @@
   function orderWithSms() {
     if (!state.cart.length) {
       setFeedback("Ajoute au moins un article avant d'envoyer la commande.");
+      return;
+    }
+
+    if (!PizzaMan.isOrderDay()) {
+      setFeedback("La pizzeria est fermée aujourd'hui. Commandes du mardi au samedi.");
+      renderTimeSlots();
       return;
     }
 
