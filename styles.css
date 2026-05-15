@@ -9,6 +9,15 @@
   --muted: #6e6256;
   --line: #e9dfd3;
   --shadow: 0 18px 45px rgba(31, 27, 23, 0.12);
+  --bottom-bar-safe-area: 0px;
+  --bottom-bar-reserve: 68px;
+}
+
+@supports (padding: max(0px)) {
+  :root {
+    --bottom-bar-safe-area: min(env(safe-area-inset-bottom, 0px), 24px);
+    --bottom-bar-reserve: calc(68px + var(--bottom-bar-safe-area));
+  }
 }
 
 * {
@@ -742,7 +751,7 @@ textarea:focus {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding: 10px 12px calc(10px + var(--bottom-bar-safe-area));
   background: rgba(255, 248, 238, 0.96);
   backdrop-filter: blur(10px);
   border-top: 1px solid var(--line);
@@ -1129,7 +1138,7 @@ fieldset {
 }
 
 body {
-  padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: var(--bottom-bar-reserve);
 }
 
 #order-button {
