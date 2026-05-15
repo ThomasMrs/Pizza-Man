@@ -687,6 +687,7 @@
     const delivery = deliveryCharge(order);
     const deliveryWarning = deliveryMinimumWarning(order);
     const itemLines = (order.items || []).flatMap(formatOrderItemLines);
+    const subtotals = categorySubtotals(order);
     const lines = [
       `🍕 Commande Pizza'Man`,
       "",
@@ -701,6 +702,11 @@
       ...itemLines,
       delivery ? `🚗 Frais livraison: ${formatMoney(delivery)}` : "",
       "",
+      subtotals.pizzas > 0 || delivery > 0
+        ? `🍕 Total pizzas${delivery > 0 ? " + livraison" : ""}: ${formatMoney(subtotals.pizzas + delivery)}`
+        : "",
+      subtotals.drinks > 0 ? `🥤 Total boissons: ${formatMoney(subtotals.drinks)}` : "",
+      subtotals.wines > 0 ? `🍷 Total vins: ${formatMoney(subtotals.wines)}` : "",
       `💰 Total: ${formatMoney(orderTotal(order))}`,
     ];
 
