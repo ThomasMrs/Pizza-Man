@@ -307,6 +307,19 @@
     customerForm.addEventListener("input", () => {
       renderCart();
     });
+    customerForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      focusNextCustomerField(document.activeElement);
+    });
+    customerForm.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+
+      const field = event.target.closest("input");
+      if (!field || !customerForm.contains(field)) return;
+
+      event.preventDefault();
+      focusNextCustomerField(field);
+    });
     customerForm.addEventListener("change", () => {
       updateCustomerRequirements();
       renderCart();
@@ -324,6 +337,21 @@
     confirmDialog.addEventListener("click", (event) => {
       if (event.target === confirmDialog) confirmDialog.close();
     });
+  }
+
+  function focusNextCustomerField(currentField) {
+    const fields = Array.from(customerForm.querySelectorAll("input, select, textarea")).filter(
+      (field) => !field.disabled && !field.hidden,
+    );
+    const currentIndex = fields.indexOf(currentField);
+    const nextField = fields[currentIndex + 1];
+
+    if (nextField) {
+      nextField.focus();
+      return;
+    }
+
+    orderButton.focus();
   }
 
   function openDialog(pizzaId, editingIndex = null) {

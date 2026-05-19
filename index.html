@@ -92,7 +92,7 @@
           <form class="customer-form" id="customer-form">
             <label>
               Nom
-              <input name="name" autocomplete="name" placeholder="Ex: Thomas" required />
+              <input name="name" autocomplete="name" enterkeyhint="next" placeholder="Ex: Thomas" required />
             </label>
             <label>
               Mode de commande
@@ -111,6 +111,7 @@
               <textarea
                 name="address"
                 id="address-field"
+                enterkeyhint="done"
                 rows="3"
                 placeholder="Adresse, heure souhaitée, code porte..."
               ></textarea>
