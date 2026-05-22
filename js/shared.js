@@ -388,7 +388,7 @@
 
   const featuredPizza = {
     // Pour désactiver la popup, commente seulement la ligne pizzaId ci-dessous.
-    pizzaId: "margarita",
+    //pizzaId: "margarita",
     category: "Pizza du moment",
     badge: "Pizza du moment",
     title: "La pizza du moment",
