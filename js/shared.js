@@ -61,6 +61,7 @@
       prices: { small: 11.9, large: 13.9 },
       image: images.classic,
       type: "pizza",
+      hamOption: true,
     },
     {
       id: "regina",
@@ -385,6 +386,15 @@
     }
   });
 
+  const featuredPizza = {
+    // Pour désactiver la popup, commente seulement la ligne pizzaId ci-dessous.
+    pizzaId: "margarita",
+    category: "Pizza du moment",
+    badge: "Pizza du moment",
+    title: "La pizza du moment",
+    note: "Disponible avec ou sans jambon, sans supplément.",
+  };
+
   const extras = [
     { id: "emmental", name: "Emmental" },
     { id: "mozzarella", name: "Mozzarella" },
@@ -519,6 +529,21 @@
     return Boolean(item && item.type === "pizza" && item.allowModification !== false);
   }
 
+  function allowsHamOption(itemOrId) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    return Boolean(item && item.hamOption);
+  }
+
+  function defaultHamOption(itemOrId) {
+    return allowsHamOption(itemOrId) ? "with" : "";
+  }
+
+  function hamOptionLabel(value) {
+    if (value === "without") return "Sans jambon";
+    if (value === "with") return "Avec jambon";
+    return "";
+  }
+
   function supplementPrice(size) {
     return config.supplementPrices[size] || config.supplementPrices.small;
   }
@@ -623,6 +648,7 @@
     const parts = [
       `${item.quantity || 1}x ${menuItem.name}`,
       label,
+      allowsHamOption(menuItem) ? hamOptionLabel(item.hamOption || defaultHamOption(menuItem)) : "",
       extraLabels.length ? `Suppléments: ${extraLabels.join(", ")}` : "",
       allowsModification(menuItem) && item.modification ? `Modification: ${item.modification}` : "",
     ].filter(Boolean);
@@ -641,6 +667,7 @@
       },
       items: cart.map((item) => ({
         ...item,
+        hamOption: allowsHamOption(item.pizzaId) ? item.hamOption || defaultHamOption(item.pizzaId) : "",
         extras: Array.isArray(item.extras) ? item.extras.slice(0, business.maxExtrasPerPizza) : [],
       })),
     };
@@ -664,6 +691,10 @@
 
     if (extraLabels.length) {
       lines.push(`  ⚠️ Suppléments: ${extraLabels.join(", ")}`);
+    }
+
+    if (allowsHamOption(menuItem)) {
+      lines.push(`  Jambon: ${hamOptionLabel(item.hamOption || defaultHamOption(menuItem))}`);
     }
 
     if (allowsModification(menuItem) && item.modification) {
@@ -706,6 +737,7 @@
   window.PizzaMan = {
     business,
     menu,
+    featuredPizza,
     extras,
     config,
     escapeHtml,
@@ -717,6 +749,9 @@
     sizeLabel,
     allowsExtras,
     allowsModification,
+    allowsHamOption,
+    defaultHamOption,
+    hamOptionLabel,
     supplementPrice,
     formatPriceRange,
     itemUnitPrice,

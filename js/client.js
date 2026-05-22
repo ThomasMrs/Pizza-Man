@@ -4,6 +4,7 @@
     selectedPizzaId: null,
     editingIndex: null,
     selectedSize: "small",
+    selectedHamOption: "with",
     selectedExtras: new Set(),
     quantity: 1,
   };
@@ -18,8 +19,6 @@
   const modeSelect = customerForm.querySelector("select[name='mode']");
   const addressField = document.querySelector("#address-field");
   const desiredTimeSelect = document.querySelector("#desired-time");
-  const openingStatus = document.querySelector("#opening-status");
-  const openingStatusLabel = document.querySelector("#opening-status-label");
   const messageOutput = document.querySelector("#message-output");
   const orderButton = document.querySelector("#order-button");
   const feedback = document.querySelector("#client-feedback");
@@ -28,6 +27,17 @@
   const bottomBarOrder = document.querySelector("#bottom-bar-order");
   const bottomBarCount = document.querySelector("#bottom-bar-count");
   const bottomBarTotal = document.querySelector("#bottom-bar-total");
+  const featuredDialog = document.querySelector("#featured-dialog");
+  const featuredClose = document.querySelector("#featured-close");
+  const featuredDismiss = document.querySelector("#featured-dismiss");
+  const featuredAdd = document.querySelector("#featured-add");
+  const featuredImage = document.querySelector("#featured-image");
+  const featuredBadge = document.querySelector("#featured-badge");
+  const featuredTitle = document.querySelector("#featured-title");
+  const featuredName = document.querySelector("#featured-name");
+  const featuredDescription = document.querySelector("#featured-description");
+  const featuredNote = document.querySelector("#featured-note");
+  const featuredPrice = document.querySelector("#featured-price");
   const dialog = document.querySelector("#pizza-dialog");
   const confirmDialog = document.querySelector("#confirm-dialog");
   const confirmCancel = document.querySelector("#confirm-cancel");
@@ -38,6 +48,8 @@
   const dialogDescription = document.querySelector("#dialog-description");
   const sizeField = document.querySelector(".segmented-field");
   const sizeControl = document.querySelector("#size-control");
+  const hamField = document.querySelector("#ham-field");
+  const hamControl = document.querySelector("#ham-control");
   const extrasGrid = document.querySelector("#extras-grid");
   const extrasField = document.querySelector("#extras-details");
   const extrasToggle = document.querySelector("#extras-toggle");
@@ -53,11 +65,10 @@
     renderMenu();
     renderTimeSlots();
     updateCustomerRequirements();
-    renderOpeningStatus();
     renderCart();
     bindEvents();
+    renderFeaturedPizzaPopup();
     window.setInterval(() => {
-      renderOpeningStatus();
       renderTimeSlots();
     }, 60000);
     refreshIcons();
@@ -106,32 +117,20 @@
     }
   }
 
-  function renderOpeningStatus() {
-    if (!openingStatus || !openingStatusLabel) return;
-
-    const now = new Date();
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const [startHours, startMinutes] = PizzaMan.business.orderStartTime.split(":").map(Number);
-    const [endHours, endMinutes] = PizzaMan.business.orderEndTime.split(":").map(Number);
-    const opensToday = PizzaMan.isOrderDay(now);
-    const start = startHours * 60 + startMinutes;
-    const end = endHours * 60 + endMinutes;
-    const isOpen = opensToday && currentMinutes >= start && currentMinutes <= end;
-
-    openingStatus.classList.toggle("is-open", isOpen);
-    openingStatus.classList.toggle("is-closed", !isOpen);
-    openingStatusLabel.textContent = isOpen
-      ? "Ouvert - jusqu'à 21h30"
-      : "Fermé - commandes possibles pour 18h45 à 21h30";
-  }
-
   function renderMenu() {
-    const categories = PizzaMan.menu.reduce((groups, item) => {
+    const featured = getFeaturedPizza();
+    const categories = new Map();
+
+    if (featured) {
+      categories.set(featured.featured.category || "Pizza du moment", [featured.item]);
+    }
+
+    PizzaMan.menu.forEach((item) => {
+      if (featured && item.id === featured.item.id) return;
       const category = item.category || "Carte";
-      if (!groups.has(category)) groups.set(category, []);
-      groups.get(category).push(item);
-      return groups;
-    }, new Map());
+      if (!categories.has(category)) categories.set(category, []);
+      categories.get(category).push(item);
+    });
 
     menuGrid.innerHTML = Array.from(categories.entries())
       .map(([category, items]) => {
@@ -213,6 +212,39 @@
       .join("");
   }
 
+  function renderHamOptionControl(item) {
+    if (!hamField || !hamControl) return;
+    hamField.hidden = !PizzaMan.allowsHamOption(item);
+  }
+
+  function getFeaturedPizza() {
+    const featured = PizzaMan.featuredPizza || {};
+    if (!featured.pizzaId) return null;
+    const item = PizzaMan.getMenuItem(featured.pizzaId);
+    return item ? { featured, item } : null;
+  }
+
+  function renderFeaturedPizzaPopup() {
+    if (!featuredDialog) return;
+
+    const current = getFeaturedPizza();
+    if (!current) return;
+
+    const { featured, item } = current;
+    featuredImage.src = item.image;
+    featuredImage.alt = `Pizza ${item.name}`;
+    featuredBadge.textContent = featured.badge || "Pizza du moment";
+    featuredTitle.textContent = featured.title || "Pizza du moment";
+    featuredName.textContent = item.name;
+    featuredDescription.textContent = item.description;
+    featuredNote.textContent = featured.note || "";
+    featuredNote.hidden = !featured.note;
+    featuredPrice.textContent = PizzaMan.formatPriceRange(item);
+
+    featuredDialog.showModal();
+    refreshIcons();
+  }
+
   function updateExtrasToggleLabel() {
     if (!extrasToggle) return;
     const count = state.selectedExtras.size;
@@ -233,6 +265,13 @@
       state.selectedSize = button.dataset.size;
       const item = PizzaMan.getMenuItem(state.selectedPizzaId);
       renderExtras(item);
+      updateDialogState();
+    });
+
+    hamControl.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-ham-option]");
+      if (!button) return;
+      state.selectedHamOption = button.dataset.hamOption;
       updateDialogState();
     });
 
@@ -332,6 +371,18 @@
 
     bottomBarOrder.addEventListener("click", orderWithSms);
 
+    featuredClose.addEventListener("click", () => featuredDialog.close());
+    featuredDismiss.addEventListener("click", () => featuredDialog.close());
+    featuredAdd.addEventListener("click", () => {
+      const current = getFeaturedPizza();
+      if (!current) return;
+      featuredDialog.close();
+      openDialog(current.item.id);
+    });
+    featuredDialog.addEventListener("click", (event) => {
+      if (event.target === featuredDialog) featuredDialog.close();
+    });
+
     confirmCancel.addEventListener("click", () => confirmDialog.close());
     confirmSend.addEventListener("click", sendOrderSms);
     confirmDialog.addEventListener("click", (event) => {
@@ -362,6 +413,9 @@
     state.selectedPizzaId = pizzaId;
     state.editingIndex = editingIndex;
     state.selectedSize = existing ? existing.size : PizzaMan.getDefaultSize(item);
+    state.selectedHamOption = existing
+      ? existing.hamOption || PizzaMan.defaultHamOption(item)
+      : PizzaMan.defaultHamOption(item);
     state.selectedExtras = new Set(existing ? existing.extras || [] : []);
     state.quantity = existing ? existing.quantity : 1;
     modificationInput.value = existing ? existing.modification || "" : "";
@@ -372,6 +426,7 @@
     dialogDescription.textContent = item.description;
 
     renderSizeControl(item);
+    renderHamOptionControl(item);
     renderExtras(item);
     if (extrasField && extrasField.tagName === "DETAILS") {
       extrasField.open = state.selectedExtras.size > 0;
@@ -387,6 +442,12 @@
 
     if (!PizzaMan.allowsExtras(item)) {
       state.selectedExtras.clear();
+    }
+
+    if (!PizzaMan.allowsHamOption(item)) {
+      state.selectedHamOption = "";
+    } else if (!state.selectedHamOption) {
+      state.selectedHamOption = PizzaMan.defaultHamOption(item);
     }
 
     const maxExtras = PizzaMan.business.maxExtrasPerPizza;
@@ -405,6 +466,10 @@
       button.classList.toggle("active", button.dataset.size === state.selectedSize);
     });
 
+    Array.from(hamControl.querySelectorAll("button[data-ham-option]")).forEach((button) => {
+      button.classList.toggle("active", button.dataset.hamOption === state.selectedHamOption);
+    });
+
     const extraLimitReached = state.selectedExtras.size >= maxExtras;
     Array.from(extrasGrid.querySelectorAll("input")).forEach((input) => {
       const checked = state.selectedExtras.has(input.value);
@@ -419,6 +484,7 @@
     const tempItem = {
       pizzaId: state.selectedPizzaId,
       size: state.selectedSize,
+      hamOption: PizzaMan.allowsHamOption(item) ? state.selectedHamOption : "",
       extras: Array.from(state.selectedExtras),
       modification: modificationInput.value.trim(),
       quantity: state.quantity,
@@ -430,6 +496,7 @@
     return [
       item.pizzaId,
       item.size,
+      item.hamOption || "",
       [...(item.extras || [])].sort().join(","),
       String(item.modification || "").trim(),
     ].join("|");
@@ -440,6 +507,7 @@
     const item = {
       pizzaId: state.selectedPizzaId,
       size: state.selectedSize,
+      hamOption: PizzaMan.allowsHamOption(itemData) ? state.selectedHamOption || PizzaMan.defaultHamOption(itemData) : "",
       extras: PizzaMan.allowsExtras(itemData)
         ? Array.from(state.selectedExtras).slice(0, PizzaMan.business.maxExtrasPerPizza)
         : [],
@@ -489,6 +557,11 @@
           .join(", ");
         const itemName = PizzaMan.escapeHtml(menuItem ? menuItem.name : "Article");
         const size = PizzaMan.escapeHtml(PizzaMan.sizeLabel(item.size, menuItem));
+        const hamOption = PizzaMan.escapeHtml(
+          menuItem && PizzaMan.allowsHamOption(menuItem)
+            ? PizzaMan.hamOptionLabel(item.hamOption || PizzaMan.defaultHamOption(menuItem))
+            : "",
+        );
         const extrasLabel = PizzaMan.escapeHtml(extras);
         const modification = PizzaMan.escapeHtml(item.modification || "");
         const titleLine = size ? `${itemName} · ${size}` : `${itemName}`;
@@ -498,6 +571,7 @@
               <h3>${titleLine}</h3>
               <strong>${PizzaMan.formatMoney(PizzaMan.itemTotal(item))}</strong>
             </div>
+            ${hamOption ? `<p><strong>Jambon: ${hamOption}</strong></p>` : ""}
             ${extrasLabel ? `<p><strong>Suppléments: ${extrasLabel}</strong></p>` : ""}
             ${modification ? `<p><strong>Modification: ${modification}</strong></p>` : ""}
             <div class="cart-item-controls">

@@ -37,9 +37,8 @@
             modification, puis le site va envoyer ta commande par SMS à la pizzeria.
           </p>
         </div>
-        <div class="intro-status" id="opening-status" aria-label="Statut pizzeria">
-          <span class="status-dot"></span>
-          <span id="opening-status-label">Mardi au samedi - 18h45 à 21h30</span>
+        <div class="intro-status" aria-label="Horaires de commande">
+          <span>commandes possibles pour 18h45 à 21h30</span>
         </div>
       </section>
 
@@ -134,6 +133,36 @@
       </section>
     </main>
 
+    <dialog class="featured-dialog" id="featured-dialog" aria-labelledby="featured-title">
+      <article class="featured-card">
+        <button class="icon-button featured-close" id="featured-close" aria-label="Fermer" type="button">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+        <div class="featured-media">
+          <img id="featured-image" alt="" />
+          <span id="featured-badge">Pizza du moment</span>
+        </div>
+        <div class="featured-content">
+          <p class="kicker">Nouveauté</p>
+          <h2 id="featured-title">La pizza du moment</h2>
+          <h3 id="featured-name"></h3>
+          <p id="featured-description"></p>
+          <p class="featured-note" id="featured-note"></p>
+          <div class="featured-price-row">
+            <span>Prix</span>
+            <strong id="featured-price"></strong>
+          </div>
+          <div class="featured-actions">
+            <button class="secondary-action" id="featured-dismiss" type="button">Plus tard</button>
+            <button class="primary-action" id="featured-add" type="button">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              Ajouter
+            </button>
+          </div>
+        </div>
+      </article>
+    </dialog>
+
     <dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title">
       <div class="confirm-card">
         <div class="confirm-icon">
@@ -182,6 +211,15 @@
           <fieldset class="segmented-field">
             <legend>Taille</legend>
             <div class="segmented-control" id="size-control"></div>
+          </fieldset>
+
+          <fieldset class="ham-field" id="ham-field" hidden>
+            <legend>Jambon</legend>
+            <div class="segmented-control" id="ham-control">
+              <button type="button" data-ham-option="with">Avec jambon</button>
+              <button type="button" data-ham-option="without">Sans jambon</button>
+            </div>
+            <p class="option-note">Ce choix est gratuit pour la Margarita.</p>
           </fieldset>
 
           <details class="extras-details" id="extras-details">
