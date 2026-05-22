@@ -15,7 +15,7 @@
     deliveryMinimum: 2,
     maxExtrasPerPizza: Infinity,
     orderDays: [2, 3, 4, 5, 6],
-    orderStartTime: "18:45",
+    orderStartTime: "18:00",
     orderEndTime: "21:00",
     orderSlotMinutes: 15,
     deliveryNote: "Livraison à partir de 2 pizzas, pas de pizza offerte en livraison.",
@@ -24,7 +24,7 @@
 
   const config = {
     currency: "EUR",
-    modificationPrice: 0.2,
+    modificationPrice: 0.5,
     supplementPrices: {
       small: 1,
       large: 1.5,
@@ -344,6 +344,15 @@
       allowExtras: false,
       allowModification: false,
     },
+    {
+      id: "munster",
+      name: "Munster",
+      category: "Les spéciales",
+      description: "base yaourt Grec, munster, lardons++, oignons++.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.classic,
+      type: "pizza",
+    },
   ];
   
   const menuImages = {
@@ -351,33 +360,34 @@
     regina: "assets/photos/entravaux.jpg",
     complete: "assets/photos/supercomplete.png",
     royale: "assets/photos/entravaux.jpg",
-    roquefort: "assets/photos/entravaux.jpg",
+    roquefort: "assets/photos/roquefort.png",
     "4-fromages": "assets/photos/entravaux.jpg",
     reblochonne: "assets/photos/reblochonne.png",
-    raclette: "assets/photos/entravaux.jpg",
+    raclette: "assets/photos/raclette.png",
     sicilienne: "assets/photos/entravaux.jpg",
     catalane: "assets/photos/catalane.png",
-    norvegienne: "assets/photos/entravaux.jpg",
-    chorizo: "assets/photos/entravaux.jpg",
+    norvegienne: "assets/photos/norvegienne.png",
+    chorizo: "assets/photos/chorizo.png",
     "super-chorizo": "assets/photos/superchorizo.png",
     "super-chef": "assets/photos/entravaux.jpg",
     "royal-merguez": "assets/photos/royalmerguez.png",
     campagnarde: "assets/photos/entravaux.jpg",
-    forestiere: "assets/photos/entravaux.jpg",
+    forestiere: "assets/photos/forestière.png",
     popolino: "assets/photos/popolino.png",
     hawaienne: "assets/photos/entravaux.jpg",
-    "chevre-miel": "assets/photos/entravaux.jpg",
+    "chevre-miel": "assets/photos/miel.png",
     "reblo-miel": "assets/photos/reblochonne.png",
     vegetarienne: "assets/photos/entravaux.jpg",
     bbq: "assets/photos/entravaux.jpg",
     kebab: "assets/photos/kebab.png",
-    "super-magret": "assets/photos/entravaux.jpg",
+    "super-magret": "assets/photos/supermagret.png",
     "choco-banane": "assets/photos/entravaux.jpg",
     "vin-deprade-jorda": "assets/photos/entravaux.jpg",
     lambrusco: "assets/photos/lambrusco.png",
     "coca-125": "assets/photos/coca-125.jpg",
     canettes: "assets/photos/canettes.jpg",
-    "despe-33": "assets/photos/despe-33.png",
+    "despe-33": "assets/photos/despe.jpg",
+    munster: "assets/photos/munster.png",
   };
 
   menu.forEach((item) => {
@@ -388,7 +398,7 @@
 
   const featuredPizza = {
     // Pour désactiver la popup, commente seulement la ligne pizzaId ci-dessous.
-    pizzaId: "margarita",
+    pizzaId: "munster",
     category: "Pizza du moment",
     badge: "Pizza du moment",
     title: "La pizza du moment",
