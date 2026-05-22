@@ -5,6 +5,7 @@
     editingIndex: null,
     selectedSize: "small",
     selectedHamOption: "with",
+    selectedDisableHamOption: false,
     selectedExtras: new Set(),
     quantity: 1,
   };
@@ -122,11 +123,10 @@
     const categories = new Map();
 
     if (featured) {
-      categories.set(featured.featured.category || "Pizza du moment", [featured.item]);
+      categories.set(featured.featured.category || "Pizza du moment", [{ ...featured.item, featuredMenuItem: true }]);
     }
 
     PizzaMan.menu.forEach((item) => {
-      if (featured && item.id === featured.item.id) return;
       const category = item.category || "Carte";
       if (!categories.has(category)) categories.set(category, []);
       categories.get(category).push(item);
@@ -152,10 +152,12 @@
   }
 
   function renderMenuCard(item) {
+    const isFeaturedCard = Boolean(item.featuredMenuItem);
     const name = PizzaMan.escapeHtml(item.name);
-    const description = PizzaMan.escapeHtml(PizzaMan.displayDescription(item));
+    const description = PizzaMan.escapeHtml(PizzaMan.displayDescription(item, { featured: isFeaturedCard }));
     const price = PizzaMan.formatPriceRange(item);
     const imageAlt = item.type === "drink" ? name : `Pizza ${name}`;
+    const addAttribute = isFeaturedCard ? "data-add-featured-pizza" : "data-add-pizza";
 
     return `
       <article class="pizza-card">
@@ -167,7 +169,7 @@
           </div>
           <p>${description}</p>
           <div class="pizza-actions single-action">
-            <button class="primary-action" type="button" data-add-pizza="${PizzaMan.escapeHtml(item.id)}">
+            <button class="primary-action" type="button" ${addAttribute}="${PizzaMan.escapeHtml(item.id)}">
               <i data-lucide="plus" aria-hidden="true"></i>
               Ajouter
             </button>
@@ -215,7 +217,11 @@
 
   function renderHamOptionControl(item) {
     if (!hamField || !hamControl) return;
-    hamField.hidden = !PizzaMan.allowsHamOption(item);
+    hamField.hidden = !allowsCurrentHamOption(item);
+  }
+
+  function allowsCurrentHamOption(item) {
+    return PizzaMan.allowsHamOption(item) && !state.selectedDisableHamOption;
   }
 
   function getFeaturedPizza() {
@@ -237,7 +243,7 @@
     featuredBadge.textContent = featured.badge || "Pizza du moment";
     featuredTitle.textContent = featured.title || "Pizza du moment";
     featuredName.textContent = item.name;
-    featuredDescription.textContent = PizzaMan.displayDescription(item);
+    featuredDescription.textContent = PizzaMan.displayDescription(item, { featured: true });
     featuredNote.textContent = featured.note || "";
     featuredNote.hidden = !featured.note;
     featuredPrice.textContent = PizzaMan.formatPriceRange(item);
@@ -255,6 +261,12 @@
 
   function bindEvents() {
     menuGrid.addEventListener("click", (event) => {
+      const featuredButton = event.target.closest("button[data-add-featured-pizza]");
+      if (featuredButton) {
+        openDialog(featuredButton.dataset.addFeaturedPizza, null, { featured: true });
+        return;
+      }
+
       const button = event.target.closest("button[data-add-pizza]");
       if (!button) return;
       openDialog(button.dataset.addPizza);
@@ -378,7 +390,7 @@
       const current = getFeaturedPizza();
       if (!current) return;
       featuredDialog.close();
-      openDialog(current.item.id);
+      openDialog(current.item.id, null, { featured: true });
     });
     featuredDialog.addEventListener("click", (event) => {
       if (event.target === featuredDialog) featuredDialog.close();
@@ -406,14 +418,18 @@
     orderButton.focus();
   }
 
-  function openDialog(pizzaId, editingIndex = null) {
+  function openDialog(pizzaId, editingIndex = null, options = {}) {
     const item = PizzaMan.getMenuItem(pizzaId);
     if (!item) return;
 
     const existing = editingIndex !== null ? state.cart[editingIndex] : null;
+    const featured = PizzaMan.featuredPizza || {};
     state.selectedPizzaId = pizzaId;
     state.editingIndex = editingIndex;
     state.selectedSize = existing ? existing.size : PizzaMan.getDefaultSize(item);
+    state.selectedDisableHamOption = existing
+      ? Boolean(existing.disableHamOption)
+      : Boolean(options.featured && featured.pizzaId === pizzaId && featured.disableHamOption);
     state.selectedHamOption = existing
       ? existing.hamOption || PizzaMan.defaultHamOption(item)
       : PizzaMan.defaultHamOption(item);
@@ -424,7 +440,7 @@
     dialogImage.src = item.image;
     dialogImage.alt = item.type === "drink" ? item.name : `Pizza ${item.name}`;
     dialogTitle.textContent = item.name;
-    dialogDescription.textContent = PizzaMan.displayDescription(item);
+    dialogDescription.textContent = PizzaMan.displayDescription(item, { featured: state.selectedDisableHamOption });
 
     renderSizeControl(item);
     renderHamOptionControl(item);
@@ -445,7 +461,7 @@
       state.selectedExtras.clear();
     }
 
-    if (!PizzaMan.allowsHamOption(item)) {
+    if (!allowsCurrentHamOption(item)) {
       state.selectedHamOption = "";
     } else if (!state.selectedHamOption) {
       state.selectedHamOption = PizzaMan.defaultHamOption(item);
@@ -485,7 +501,8 @@
     const tempItem = {
       pizzaId: state.selectedPizzaId,
       size: state.selectedSize,
-      hamOption: PizzaMan.allowsHamOption(item) ? state.selectedHamOption : "",
+      disableHamOption: state.selectedDisableHamOption,
+      hamOption: allowsCurrentHamOption(item) ? state.selectedHamOption : "",
       extras: Array.from(state.selectedExtras),
       modification: modificationInput.value.trim(),
       quantity: state.quantity,
@@ -497,6 +514,7 @@
     return [
       item.pizzaId,
       item.size,
+      item.disableHamOption ? "disable-ham-option" : "",
       item.hamOption || "",
       [...(item.extras || [])].sort().join(","),
       String(item.modification || "").trim(),
@@ -508,7 +526,10 @@
     const item = {
       pizzaId: state.selectedPizzaId,
       size: state.selectedSize,
-      hamOption: PizzaMan.allowsHamOption(itemData) ? state.selectedHamOption || PizzaMan.defaultHamOption(itemData) : "",
+      disableHamOption: state.selectedDisableHamOption,
+      hamOption: allowsCurrentHamOption(itemData)
+        ? state.selectedHamOption || PizzaMan.defaultHamOption(itemData)
+        : "",
       extras: PizzaMan.allowsExtras(itemData)
         ? Array.from(state.selectedExtras).slice(0, PizzaMan.business.maxExtrasPerPizza)
         : [],
@@ -559,7 +580,7 @@
         const itemName = PizzaMan.escapeHtml(menuItem ? menuItem.name : "Article");
         const size = PizzaMan.escapeHtml(PizzaMan.sizeLabel(item.size, menuItem));
         const hamOption = PizzaMan.escapeHtml(
-          menuItem && PizzaMan.allowsHamOption(menuItem)
+          menuItem && PizzaMan.allowsHamOption(menuItem) && !item.disableHamOption
             ? PizzaMan.hamOptionLabel(item.hamOption || PizzaMan.defaultHamOption(menuItem))
             : "",
         );

@@ -532,7 +532,6 @@
 
   function allowsHamOption(itemOrId) {
     const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
-    if (item && featuredPizza.pizzaId === item.id && featuredPizza.disableHamOption) return false;
     return Boolean(item && item.hamOption);
   }
 
@@ -546,10 +545,10 @@
     return "";
   }
 
-  function displayDescription(itemOrId) {
+  function displayDescription(itemOrId, options = {}) {
     const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
     if (!item) return "";
-    if (item.id === featuredPizza.pizzaId && featuredPizza.disableHamOption) {
+    if (options.featured && item.id === featuredPizza.pizzaId && featuredPizza.disableHamOption) {
       return String(item.description || "")
         .replace(" Disponible avec ou sans jambon.", "")
         .replace("Disponible avec ou sans jambon.", "")
@@ -662,7 +661,9 @@
     const parts = [
       `${item.quantity || 1}x ${menuItem.name}`,
       label,
-      allowsHamOption(menuItem) ? hamOptionLabel(item.hamOption || defaultHamOption(menuItem)) : "",
+      allowsHamOption(menuItem) && !item.disableHamOption
+        ? hamOptionLabel(item.hamOption || defaultHamOption(menuItem))
+        : "",
       extraLabels.length ? `Suppléments: ${extraLabels.join(", ")}` : "",
       allowsModification(menuItem) && item.modification ? `Modification: ${item.modification}` : "",
     ].filter(Boolean);
@@ -681,7 +682,10 @@
       },
       items: cart.map((item) => ({
         ...item,
-        hamOption: allowsHamOption(item.pizzaId) ? item.hamOption || defaultHamOption(item.pizzaId) : "",
+        hamOption:
+          allowsHamOption(item.pizzaId) && !item.disableHamOption
+            ? item.hamOption || defaultHamOption(item.pizzaId)
+            : "",
         extras: Array.isArray(item.extras) ? item.extras.slice(0, business.maxExtrasPerPizza) : [],
       })),
     };
@@ -707,7 +711,7 @@
       lines.push(`  ⚠️ Suppléments: ${extraLabels.join(", ")}`);
     }
 
-    if (allowsHamOption(menuItem)) {
+    if (allowsHamOption(menuItem) && !item.disableHamOption) {
       lines.push(`  Jambon: ${hamOptionLabel(item.hamOption || defaultHamOption(menuItem))}`);
     }
 
