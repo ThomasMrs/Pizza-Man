@@ -1330,6 +1330,11 @@ body {
 }
 
 @media (min-width: 981px) {
+  .menu-category.is-featured .category-grid {
+    grid-template-columns: minmax(260px, 360px);
+    justify-content: start;
+  }
+
   .bottom-bar {
     display: none;
   }

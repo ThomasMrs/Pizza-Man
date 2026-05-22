@@ -392,7 +392,8 @@
     category: "Pizza du moment",
     badge: "Pizza du moment",
     title: "La pizza du moment",
-    note: "Disponible avec ou sans jambon, sans supplément.",
+    note: "Une pizza mise en avant pour le moment.",
+    disableHamOption: true,
   };
 
   const extras = [
@@ -531,6 +532,7 @@
 
   function allowsHamOption(itemOrId) {
     const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    if (item && featuredPizza.pizzaId === item.id && featuredPizza.disableHamOption) return false;
     return Boolean(item && item.hamOption);
   }
 
@@ -542,6 +544,18 @@
     if (value === "without") return "Sans jambon";
     if (value === "with") return "Avec jambon";
     return "";
+  }
+
+  function displayDescription(itemOrId) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    if (!item) return "";
+    if (item.id === featuredPizza.pizzaId && featuredPizza.disableHamOption) {
+      return String(item.description || "")
+        .replace(" Disponible avec ou sans jambon.", "")
+        .replace("Disponible avec ou sans jambon.", "")
+        .trim();
+    }
+    return item.description || "";
   }
 
   function supplementPrice(size) {
@@ -752,6 +766,7 @@
     allowsHamOption,
     defaultHamOption,
     hamOptionLabel,
+    displayDescription,
     supplementPrice,
     formatPriceRange,
     itemUnitPrice,

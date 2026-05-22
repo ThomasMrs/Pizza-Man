@@ -135,8 +135,9 @@
     menuGrid.innerHTML = Array.from(categories.entries())
       .map(([category, items]) => {
         const cards = items.map(renderMenuCard).join("");
+        const isFeaturedCategory = featured && category === (featured.featured.category || "Pizza du moment");
         return `
-          <section class="menu-category">
+          <section class="menu-category${isFeaturedCategory ? " is-featured" : ""}">
             <div class="menu-category-heading">
               <h3>${PizzaMan.escapeHtml(category)}</h3>
               <span>${items.length} article(s)</span>
@@ -152,7 +153,7 @@
 
   function renderMenuCard(item) {
     const name = PizzaMan.escapeHtml(item.name);
-    const description = PizzaMan.escapeHtml(item.description);
+    const description = PizzaMan.escapeHtml(PizzaMan.displayDescription(item));
     const price = PizzaMan.formatPriceRange(item);
     const imageAlt = item.type === "drink" ? name : `Pizza ${name}`;
 
@@ -236,7 +237,7 @@
     featuredBadge.textContent = featured.badge || "Pizza du moment";
     featuredTitle.textContent = featured.title || "Pizza du moment";
     featuredName.textContent = item.name;
-    featuredDescription.textContent = item.description;
+    featuredDescription.textContent = PizzaMan.displayDescription(item);
     featuredNote.textContent = featured.note || "";
     featuredNote.hidden = !featured.note;
     featuredPrice.textContent = PizzaMan.formatPriceRange(item);
@@ -423,7 +424,7 @@
     dialogImage.src = item.image;
     dialogImage.alt = item.type === "drink" ? item.name : `Pizza ${item.name}`;
     dialogTitle.textContent = item.name;
-    dialogDescription.textContent = item.description;
+    dialogDescription.textContent = PizzaMan.displayDescription(item);
 
     renderSizeControl(item);
     renderHamOptionControl(item);

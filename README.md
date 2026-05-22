@@ -68,7 +68,8 @@ const featuredPizza = {
   category: "Pizza du moment",
   badge: "Pizza du moment",
   title: "La pizza du moment",
-  note: "Disponible avec ou sans jambon, sans supplément.",
+  note: "Une pizza mise en avant pour le moment.",
+  disableHamOption: true,
 };
 ```
 
@@ -80,7 +81,8 @@ const featuredPizza = {
   category: "Pizza du moment",
   badge: "Pizza du moment",
   title: "La pizza du moment",
-  note: "Disponible avec ou sans jambon, sans supplément.",
+  note: "Une pizza mise en avant pour le moment.",
+  disableHamOption: true,
 };
 ```
 
@@ -106,6 +108,8 @@ Pour changer le texte de la popup :
 - `badge` : petit badge sur l'image de la popup ;
 - `title` : grand titre de la popup ;
 - `note` : phrase mise en avant dans la popup.
+- `disableHamOption` : mettre `true` pour enlever le choix avec/sans jambon
+  quand cette pizza est la pizza du moment.
 
 ### Modifier les ingrédients d'une pizza
 
@@ -226,6 +230,9 @@ hamOption: true,
 
 Cette ligne affiche le choix `Avec jambon` / `Sans jambon` uniquement pour cette
 pizza. Ce choix ne change pas le prix.
+
+Si la Margarita est utilisée comme pizza du moment avec `disableHamOption: true`,
+ce choix est masqué.
 
 ## Publier sur GitHub Pages
 
