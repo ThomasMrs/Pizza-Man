@@ -39,9 +39,26 @@
             <span class="eta-label">Dans environ</span>
             <strong id="eta-remaining">-- min</strong>
           </div>
+          <div class="eta-block" id="eta-distance-block" hidden>
+            <span class="eta-label">Distance</span>
+            <strong id="eta-distance">-- km</strong>
+          </div>
         </div>
 
+        <p class="eta-source" id="eta-source" hidden></p>
+
         <p class="tracking-note" id="tracking-note"></p>
+
+        <div class="geo-prompt" id="geo-prompt" hidden>
+          <p id="geo-prompt-text">
+            <i data-lucide="crosshair" aria-hidden="true"></i>
+            Activez votre position pour une estimation d'arrivée précise, calculée selon l'endroit où vous êtes.
+          </p>
+          <button class="primary-action" id="geo-enable" type="button">
+            <i data-lucide="navigation" aria-hidden="true"></i>
+            Activer ma position
+          </button>
+        </div>
 
         <a class="secondary-action tracking-maps-link" id="maps-link" href="#" target="_blank" rel="noreferrer" hidden>
           <i data-lucide="map-pin" aria-hidden="true"></i>

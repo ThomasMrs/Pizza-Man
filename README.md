@@ -268,6 +268,22 @@ La position se rafraîchit via Supabase Realtime, avec un rafraîchissement
 périodique (toutes les 5 s) en filet de sécurité. La carte utilise Leaflet +
 OpenStreetMap (gratuit, sans clé d'API).
 
+### Estimation d'arrivée dynamique (façon Uber Eats)
+
+Sur la page de suivi, le client peut **activer sa position**. L'estimation
+d'arrivée est alors recalculée en continu :
+
+- itinéraire routier réel entre le livreur et le client via OSRM
+  (`router.project-osrm.org`, gratuit et sans clé) ;
+- le tracé de la route s'affiche sur la carte, avec la **distance restante** ;
+- l'heure d'arrivée et le temps restant se mettent à jour à chaque déplacement du
+  livreur (recalcul limité à 1 fois / 8 s).
+
+Si le routage échoue, une estimation « à vol d'oiseau » (distance × 1,3 à ~23
+km/h) prend le relais. Si le client refuse la géolocalisation, l'estimation
+retombe sur la durée fixe saisie par le livreur au départ. Aucune donnée de
+position du client n'est enregistrée : le calcul se fait dans son navigateur.
+
 ### Configuration Supabase (à faire une fois)
 
 1. Dans le tableau de bord Supabase, ouvrir `SQL Editor`, coller le contenu de

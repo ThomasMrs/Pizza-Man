@@ -1550,8 +1550,8 @@ body {
 
 .tracking-eta {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
 }
 
 .eta-block {
@@ -1564,14 +1564,49 @@ body {
 
 .eta-label {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
 .eta-block strong {
   color: var(--green-dark);
-  font-size: 1.5rem;
-  line-height: 1;
+  font-size: 1.3rem;
+  line-height: 1.1;
+}
+
+.eta-source {
+  margin: -4px 0 0;
+  color: var(--green-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.geo-prompt {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px dashed rgba(14, 91, 63, 0.4);
+  border-radius: 10px;
+  background: rgba(14, 91, 63, 0.05);
+}
+
+.geo-prompt p {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.geo-prompt svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.geo-prompt .primary-action {
+  justify-self: start;
 }
 
 .tracking-note {
@@ -1623,8 +1658,7 @@ body {
 
 @media (max-width: 480px) {
   .delivery-actions,
-  .delivery-end-actions,
-  .tracking-eta {
+  .delivery-end-actions {
     grid-template-columns: 1fr;
   }
 }
