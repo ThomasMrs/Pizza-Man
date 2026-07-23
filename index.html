@@ -8,9 +8,11 @@
       name="description"
       content="Composez votre commande Pizza'Man, choisissez vos pizzas, ajoutez des suppléments et envoyez la commande à la pizzeria."
     />
-    <link rel="icon" href="assets/favicon.png" type="image/png" />
+    <link rel="icon" href="assets/pizzaman-logo-clean.png" type="image/png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
+  
+  
   <body>
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="Pizza'Man accueil">
@@ -22,20 +24,21 @@
         <a href="https://share.google/MiNwfMVDMd9wwK8vd" target="_blank" rel="noreferrer">Google</a>
       </nav>
     </header>
-
+    
+  <!-- PAGE ACCUEIL pizzaman-logo-clean-->  
+    
     <main>
       <section class="intro-band" aria-labelledby="page-title">
         <div class="intro-copy">
-          <p class="kicker">Cuisson au feu de bois - Depuis 1996</p>
-          <h1 id="page-title">Pizza'Man St Jean</h1>
+          <p class="kicker"></p>
+          <h1 id="page-title">Pizza'Man Saint Jean, cuisson au feu de bois depuis plus de 30 ans</h1>
           <p>
-            Choisis petite ou grande pizza, ajoute tes suppléments, précise une
-            modification, puis envoie la commande par SMS à la pizzeria.
+            Choisis la taille, ajoute tes suppléments, précise une
+            modification, puis le site va envoyer ta commande par SMS à la pizzeria.
           </p>
         </div>
-        <div class="intro-status" id="opening-status" aria-label="Statut pizzeria">
-          <span class="status-dot"></span>
-          <span id="opening-status-label">Mardi au samedi - 18h45 à 21h30</span>
+        <div class="intro-status" aria-label="Horaires de commande">
+          <span>commandes possibles de 18h00 à 21h30 du mardi au samedi</span>
         </div>
       </section>
 
@@ -46,7 +49,7 @@
         </div>
         <div>
           <i data-lucide="truck" aria-hidden="true"></i>
-          <span>Livraison : Le Boulou, Céret, Maureillas, St Jean - 4 EUR</span>
+          <span>Livraison : Le Boulou, Céret, Maureillas, St Jean - 4 EUR/LIVRAISON</span>
         </div>
         <a href="sms:+33646576369">
           <i data-lucide="message-square" aria-hidden="true"></i>
@@ -61,8 +64,8 @@
             <h2>Carte Pizza'Man</h2>
             <p class="section-note">
               Petite 26cm, grande 33cm. Supplément : 1 EUR petite, 1,50 EUR grande.
-              Modification : 0,20 EUR. Livraison à partir de 2 pizzas, pas de pizza
-              offerte en livraison.
+              Modification : 0,50 EUR. Livraison à partir de 2 pizzas, pas de pizza
+              offerte en livraison. La liste des allergènes est disponible à la pizzéria.Toute demande liée à une allergie alimentaire doit être signalée avant le début du service.
             </p>
           </div>
           <div class="menu-grid" id="menu-grid"></div>
@@ -138,6 +141,36 @@
       </a>
     </footer>
 
+    <dialog class="featured-dialog" id="featured-dialog" aria-labelledby="featured-title">
+      <article class="featured-card">
+        <button class="icon-button featured-close" id="featured-close" aria-label="Fermer" type="button">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+        <div class="featured-media">
+          <img id="featured-image" alt="" />
+          <span id="featured-badge">Pizza du moment</span>
+        </div>
+        <div class="featured-content">
+          <p class="kicker">Nouveauté</p>
+          <h2 id="featured-title">La pizza du moment</h2>
+          <h3 id="featured-name"></h3>
+          <p id="featured-description"></p>
+          <p class="featured-note" id="featured-note"></p>
+          <div class="featured-price-row">
+            <span>Prix</span>
+            <strong id="featured-price"></strong>
+          </div>
+          <div class="featured-actions">
+            <button class="secondary-action" id="featured-dismiss" type="button">Plus tard</button>
+            <button class="primary-action" id="featured-add" type="button">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              Ajouter
+            </button>
+          </div>
+        </div>
+      </article>
+    </dialog>
+
     <dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title">
       <div class="confirm-card">
         <div class="confirm-icon">
@@ -188,6 +221,15 @@
             <div class="segmented-control" id="size-control"></div>
           </fieldset>
 
+          <fieldset class="ham-field" id="ham-field" hidden>
+            <legend>Jambon</legend>
+            <div class="segmented-control" id="ham-control">
+              <button type="button" data-ham-option="with">Avec jambon</button>
+              <button type="button" data-ham-option="without">Sans jambon</button>
+            </div>
+            <p class="option-note">Ce choix est gratuit pour la Margarita.</p>
+          </fieldset>
+
           <details class="extras-details" id="extras-details">
             <summary id="extras-toggle">
               <span class="extras-toggle-label">Suppléments</span>
@@ -205,7 +247,7 @@
               rows="3"
               placeholder="Ex: sans olives, moins de fromage..."
             ></textarea>
-            <span class="option-note">Toute modification ajoute 0,20 EUR par pizza.</span>
+            <span class="option-note">Toute modification ajoute 0,50 EUR par pizza.</span>
           </label>
 
           <div class="quantity-row">

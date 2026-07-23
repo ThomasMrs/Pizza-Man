@@ -15,8 +15,8 @@
     deliveryMinimum: 2,
     maxExtrasPerPizza: Infinity,
     orderDays: [2, 3, 4, 5, 6],
-    orderStartTime: "18:45",
-    orderEndTime: "21:30",
+    orderStartTime: "18:00",
+    orderEndTime: "21:00",
     orderSlotMinutes: 15,
     deliveryNote: "Livraison à partir de 2 pizzas, pas de pizza offerte en livraison.",
     allergenNote: "Liste des allergènes disponible sur demande.",
@@ -24,7 +24,7 @@
 
   const config = {
     currency: "EUR",
-    modificationPrice: 0.2,
+    modificationPrice: 0.5,
     supplementPrices: {
       small: 1,
       large: 1.5,
@@ -51,21 +51,23 @@
       "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
   };
 
+  
   const menu = [
     {
       id: "margarita",
       name: "Margarita",
       category: "Les classiques",
-      description: "Tomate, jambon, emmental, mozzarella, olives. Disponible avec ou sans jambon.",
+      description: "Base tomate, jambon, emmental, mozzarella, olives. Disponible avec ou sans jambon.",
       prices: { small: 11.9, large: 13.9 },
       image: images.classic,
       type: "pizza",
+      hamOption: true,
     },
     {
       id: "regina",
       name: "Régina",
       category: "Les classiques",
-      description: "Tomate, jambon, champignons, emmental, olives.",
+      description: "Base tomate, jambon, champignons, emmental, olives.",
       prices: { small: 12.9, large: 14.9 },
       image: images.classic,
       type: "pizza",
@@ -74,7 +76,7 @@
       id: "complete",
       name: "Complète",
       category: "Les classiques",
-      description: "Tomate, jambon, emmental, oeuf, olives.",
+      description: "Base tomate, jambon, emmental, oeuf, olives.",
       prices: { small: 11.9, large: 13.9 },
       image: images.classic,
       type: "pizza",
@@ -83,7 +85,7 @@
       id: "royale",
       name: "Royale",
       category: "Les classiques",
-      description: "Crème, champignons, emmental, lardons, chèvre, oeuf, olives.",
+      description: "Base crème, champignons, emmental, lardons, chèvre, oeuf, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.classic,
       type: "pizza",
@@ -92,7 +94,7 @@
       id: "roquefort",
       name: "Roquefort",
       category: "Le choix du fromager",
-      description: "Tomate, emmental, roquefort, mozzarella, crème, olives.",
+      description: "Base tomate, emmental, roquefort, mozzarella, crème, olives.",
       prices: { small: 13.9, large: 15.9 },
       image: images.cheese,
       type: "pizza",
@@ -101,7 +103,7 @@
       id: "4-fromages",
       name: "4 Fromages",
       category: "Le choix du fromager",
-      description: "Tomate, emmental, mozzarella, chèvre, roquefort, crème, olives.",
+      description: "Base tomate, emmental, mozzarella, chèvre, roquefort, crème, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.cheese,
       type: "pizza",
@@ -110,7 +112,7 @@
       id: "reblochonne",
       name: "Reblochonne",
       category: "Le choix du fromager",
-      description: "Crème, emmental, reblochon, lardons, oignons, olives.",
+      description: "Base crème, emmental, reblochon, lardons, oignons, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.cheese,
       type: "pizza",
@@ -119,7 +121,7 @@
       id: "raclette",
       name: "Raclette",
       category: "Le choix du fromager",
-      description: "Crème, jambon, emmental, raclette, lardons, olives.",
+      description: "Base crème, jambon, emmental, raclette, lardons, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.cheese,
       type: "pizza",
@@ -128,7 +130,7 @@
       id: "sicilienne",
       name: "Sicilienne",
       category: "Le choix du pêcheur",
-      description: "Tomate, emmental, anchois, olives.",
+      description: "Base tomate, emmental, anchois, olives.",
       prices: { small: 12.9, large: 14.9 },
       image: images.fish,
       type: "pizza",
@@ -137,7 +139,7 @@
       id: "catalane",
       name: "Catalane",
       category: "Le choix du pêcheur",
-      description: "Tomate, emmental, anchois, poivrons, oignons, olives.",
+      description: "Base tomate, emmental, anchois, poivrons, oignons, olives.",
       prices: { small: 13.9, large: 15.9 },
       image: images.fish,
       type: "pizza",
@@ -146,7 +148,7 @@
       id: "norvegienne",
       name: "Norvégienne",
       category: "Le choix du pêcheur",
-      description: "Tomate, saumon, emmental, mozzarella, crème, olives.",
+      description: "Base tomate, saumon, emmental, mozzarella, crème, olives.",
       prices: { small: 13.9, large: 17.9 },
       image: images.fish,
       type: "pizza",
@@ -155,7 +157,7 @@
       id: "chorizo",
       name: "Chorizo",
       category: "Le choix du charcutier",
-      description: "Tomate, chorizo, emmental, crème fraîche, olives.",
+      description: "Base tomate, chorizo, emmental, crème fraîche, olives.",
       prices: { small: 12.9, large: 14.9 },
       image: images.meat,
       type: "pizza",
@@ -164,7 +166,7 @@
       id: "super-chorizo",
       name: "Super Chorizo",
       category: "Le choix du charcutier",
-      description: "Tomate, chorizo, emmental, chèvre, poivrons, olives.",
+      description: "Base tomate, chorizo, emmental, chèvre, poivrons, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.meat,
       type: "pizza",
@@ -173,7 +175,7 @@
       id: "super-chef",
       name: "Super Chef",
       category: "Le choix du charcutier",
-      description: "Tomate, emmental, merguez, oignons, olives.",
+      description: "Base tomate, emmental, merguez, oignons, olives.",
       prices: { small: 13.9, large: 15.9 },
       image: images.meat,
       type: "pizza",
@@ -182,7 +184,7 @@
       id: "royal-merguez",
       name: "Royal Merguez",
       category: "Le choix du charcutier",
-      description: "Tomate, chorizo, emmental, merguez, oeuf, olives.",
+      description: "Base tomate, chorizo, emmental, merguez, oeuf, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.meat,
       type: "pizza",
@@ -191,7 +193,7 @@
       id: "campagnarde",
       name: "Campagnarde",
       category: "Le choix du charcutier",
-      description: "Tomate, emmental, lardons, oignons, crème, olives.",
+      description: "Base tomate, emmental, lardons, oignons, crème, olives.",
       prices: { small: 13.9, large: 15.9 },
       image: images.meat,
       type: "pizza",
@@ -200,7 +202,7 @@
       id: "forestiere",
       name: "Forestière",
       category: "Le choix du charcutier",
-      description: "Tomate, champignons, emmental, lardons, crème, ail, olives.",
+      description: "Base tomate, champignons, emmental, lardons, crème, ail, olives.",
       prices: { small: 13.9, large: 15.9 },
       image: images.meat,
       type: "pizza",
@@ -209,7 +211,7 @@
       id: "popolino",
       name: "Popoliño",
       category: "Les sucrées / salées",
-      description: "Tomate, jambon, ananas, emmental, chèvre, miel, olives.",
+      description: "Base tomate, jambon, ananas, emmental, chèvre, miel, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.sweet,
       type: "pizza",
@@ -218,7 +220,7 @@
       id: "hawaienne",
       name: "Hawaïenne",
       category: "Les sucrées / salées",
-      description: "Tomate, jambon, ananas, emmental, olives.",
+      description: "Base tomate, jambon, ananas, emmental, olives.",
       prices: { small: 12.9, large: 14.9 },
       image: images.sweet,
       type: "pizza",
@@ -227,7 +229,7 @@
       id: "chevre-miel",
       name: "Chèvre Miel",
       category: "Les sucrées / salées",
-      description: "Crème fraîche, emmental, mozzarella, miel, chèvre, olives.",
+      description: "Base crème, emmental, mozzarella, miel, chèvre, olives.",
       prices: { small: 12.9, large: 14.9 },
       image: images.sweet,
       type: "pizza",
@@ -236,7 +238,7 @@
       id: "reblo-miel",
       name: "Reblo-Miel",
       category: "Les sucrées / salées",
-      description: "Crème, emmental, reblochon, miel, lardons, oignons, olives.",
+      description: "Base crème, emmental, reblochon, miel, lardons, oignons, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.sweet,
       type: "pizza",
@@ -245,7 +247,7 @@
       id: "vegetarienne",
       name: "Végétarienne",
       category: "Les spéciales",
-      description: "Tomate, champignons, emmental, poivrons, oignons, pincée de sel, olives.",
+      description: "Base tomate, champignons, emmental, poivrons, oignons, pincée de sel, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.special,
       type: "pizza",
@@ -254,7 +256,7 @@
       id: "bbq",
       name: "BBQ",
       category: "Les spéciales",
-      description: "Tomate, emmental, sauce BBQ, viande hachée, poivrons, oignons, olives.",
+      description: "Base tomate, emmental, sauce BBQ, viande hachée, poivrons, oignons, olives.",
       prices: { small: 13.9, large: 16.9 },
       image: images.special,
       type: "pizza",
@@ -272,7 +274,7 @@
       id: "super-magret",
       name: "Super Magret",
       category: "Les spéciales",
-      description: "Crème, champignons, emmental, magret du sud-ouest, sel, poivre, chèvre, olives.",
+      description: "Base crème, champignons, emmental, magret du sud-ouest, sel, poivre, chèvre, olives.",
       prices: { small: 14.9, large: 18.9 },
       image: images.special,
       type: "pizza",
@@ -342,40 +344,50 @@
       allowExtras: false,
       allowModification: false,
     },
+    {
+      id: "munster",
+      name: "Munster",
+      category: "Les spéciales",
+      description: "base yaourt Grec, munster, lardons++, oignons++.",
+      prices: { small: 13.9, large: 16.9 },
+      image: images.classic,
+      type: "pizza",
+    },
   ];
-
+  
   const menuImages = {
-    margarita: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=900&q=80",
-    regina: "https://images.unsplash.com/photo-1594007654729-407eedc4be65?auto=format&fit=crop&w=900&q=80",
-    complete: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=900&q=80",
-    royale: "https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?auto=format&fit=crop&w=900&q=80",
-    roquefort: "https://images.unsplash.com/photo-1593504049359-74330189a345?auto=format&fit=crop&w=900&q=80",
-    "4-fromages": "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=900&q=80",
-    reblochonne: "https://images.unsplash.com/photo-1555072956-7758afb20e8f?auto=format&fit=crop&w=900&q=80",
-    raclette: "https://images.unsplash.com/photo-1571066811602-716837d681de?auto=format&fit=crop&w=900&q=80",
-    sicilienne: "https://images.unsplash.com/photo-1652952561151-97e82f26c336?auto=format&fit=crop&w=900&q=80",
-    catalane: "https://images.unsplash.com/photo-1614442316719-1e38c661c29c?auto=format&fit=crop&w=900&q=80",
-    norvegienne: "https://images.unsplash.com/photo-1718724587928-8d98db46139b?auto=format&fit=crop&w=900&q=80",
-    chorizo: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=900&q=80",
-    "super-chorizo": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=80",
-    "super-chef": "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=900&q=80",
-    "royal-merguez": "https://images.unsplash.com/photo-1613564834361-9436948817d1?auto=format&fit=crop&w=900&q=80",
-    campagnarde: "https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&w=900&q=80",
-    forestiere: "https://images.unsplash.com/photo-1528137871618-79d2761e3fd5?auto=format&fit=crop&w=900&q=80",
-    popolino: "https://images.unsplash.com/photo-1611915365928-565c527a0590?auto=format&fit=crop&w=900&q=80",
-    hawaienne: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&q=80",
-    "chevre-miel": "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80",
-    "reblo-miel": "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=900&q=80",
-    vegetarienne: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=900&q=80",
-    bbq: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=900&q=80",
-    kebab: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=80",
-    "super-magret": "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=900&q=80",
-    "choco-banane": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80",
-    "vin-deprade-jorda": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=900&q=80",
+    margarita: "assets/photos/margarita.png",
+    regina: "assets/photos/entravaux.jpg",
+    complete: "assets/photos/supercomplete.png",
+    royale: "assets/photos/entravaux.jpg",
+    roquefort: "assets/photos/roquefort.png",
+    "4-fromages": "assets/photos/entravaux.jpg",
+    reblochonne: "assets/photos/reblochonne.png",
+    raclette: "assets/photos/raclette.png",
+    sicilienne: "assets/photos/entravaux.jpg",
+    catalane: "assets/photos/catalane.png",
+    norvegienne: "assets/photos/norvegienne.png",
+    chorizo: "assets/photos/chorizo.png",
+    "super-chorizo": "assets/photos/superchorizo.png",
+    "super-chef": "assets/photos/entravaux.jpg",
+    "royal-merguez": "assets/photos/royalmerguez.png",
+    campagnarde: "assets/photos/entravaux.jpg",
+    forestiere: "assets/photos/forestière.png",
+    popolino: "assets/photos/popolino.png",
+    hawaienne: "assets/photos/entravaux.jpg",
+    "chevre-miel": "assets/photos/miel.png",
+    "reblo-miel": "assets/photos/reblochonne.png",
+    vegetarienne: "assets/photos/entravaux.jpg",
+    bbq: "assets/photos/entravaux.jpg",
+    kebab: "assets/photos/kebab.png",
+    "super-magret": "assets/photos/supermagret.png",
+    "choco-banane": "assets/photos/entravaux.jpg",
+    "vin-deprade-jorda": "assets/photos/entravaux.jpg",
     lambrusco: "assets/photos/lambrusco.png",
     "coca-125": "assets/photos/coca-125.jpg",
     canettes: "assets/photos/canettes.jpg",
-    "despe-33": "assets/photos/despe-33.png",
+    "despe-33": "assets/photos/despe.jpg",
+    munster: "assets/photos/munster.png",
   };
 
   menu.forEach((item) => {
@@ -383,6 +395,16 @@
       item.image = menuImages[item.id];
     }
   });
+
+  const featuredPizza = {
+    // Pour désactiver la popup, commente seulement la ligne pizzaId ci-dessous.
+    pizzaId: "munster",
+    category: "Pizza du moment",
+    badge: "Pizza du moment",
+    title: "La pizza du moment",
+    note: "Une pizza mise en avant pour le moment.",
+    disableHamOption: true,
+  };
 
   const extras = [
     { id: "emmental", name: "Emmental" },
@@ -518,6 +540,33 @@
     return Boolean(item && item.type === "pizza" && item.allowModification !== false);
   }
 
+  function allowsHamOption(itemOrId) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    return Boolean(item && item.hamOption);
+  }
+
+  function defaultHamOption(itemOrId) {
+    return allowsHamOption(itemOrId) ? "with" : "";
+  }
+
+  function hamOptionLabel(value) {
+    if (value === "without") return "Sans jambon";
+    if (value === "with") return "Avec jambon";
+    return "";
+  }
+
+  function displayDescription(itemOrId, options = {}) {
+    const item = typeof itemOrId === "string" ? getMenuItem(itemOrId) : itemOrId;
+    if (!item) return "";
+    if (options.featured && item.id === featuredPizza.pizzaId && featuredPizza.disableHamOption) {
+      return String(item.description || "")
+        .replace(" Disponible avec ou sans jambon.", "")
+        .replace("Disponible avec ou sans jambon.", "")
+        .trim();
+    }
+    return item.description || "";
+  }
+
   function supplementPrice(size) {
     return config.supplementPrices[size] || config.supplementPrices.small;
   }
@@ -622,6 +671,9 @@
     const parts = [
       `${item.quantity || 1}x ${menuItem.name}`,
       label,
+      allowsHamOption(menuItem) && !item.disableHamOption
+        ? hamOptionLabel(item.hamOption || defaultHamOption(menuItem))
+        : "",
       extraLabels.length ? `Suppléments: ${extraLabels.join(", ")}` : "",
       allowsModification(menuItem) && item.modification ? `Modification: ${item.modification}` : "",
     ].filter(Boolean);
@@ -640,6 +692,10 @@
       },
       items: cart.map((item) => ({
         ...item,
+        hamOption:
+          allowsHamOption(item.pizzaId) && !item.disableHamOption
+            ? item.hamOption || defaultHamOption(item.pizzaId)
+            : "",
         extras: Array.isArray(item.extras) ? item.extras.slice(0, business.maxExtrasPerPizza) : [],
       })),
     };
@@ -663,6 +719,10 @@
 
     if (extraLabels.length) {
       lines.push(`  ⚠️ Suppléments: ${extraLabels.join(", ")}`);
+    }
+
+    if (allowsHamOption(menuItem) && !item.disableHamOption) {
+      lines.push(`  Jambon: ${hamOptionLabel(item.hamOption || defaultHamOption(menuItem))}`);
     }
 
     if (allowsModification(menuItem) && item.modification) {
@@ -705,6 +765,7 @@
   window.PizzaMan = {
     business,
     menu,
+    featuredPizza,
     extras,
     config,
     escapeHtml,
@@ -716,6 +777,10 @@
     sizeLabel,
     allowsExtras,
     allowsModification,
+    allowsHamOption,
+    defaultHamOption,
+    hamOptionLabel,
+    displayDescription,
     supplementPrice,
     formatPriceRange,
     itemUnitPrice,
