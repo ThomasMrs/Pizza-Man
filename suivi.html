@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Pizza'Man - Suivi de ma livraison</title>
+    <meta name="description" content="Suivez en direct la position de votre livreur Pizza'Man." />
+    <link rel="icon" href="assets/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Pizza'Man accueil">
+        <img src="assets/pizzaman-logo-clean.png" alt="" />
+        <span>Pizza'Man St Jean</span>
+      </a>
+      <nav class="top-nav" aria-label="Navigation principale">
+        <a href="index.html">Commander</a>
+      </nav>
+    </header>
+
+    <main class="tracking-page">
+      <section class="tracking-card" id="tracking-card">
+        <div class="tracking-head">
+          <span class="live-dot" id="live-dot" aria-hidden="true"></span>
+          <div>
+            <p class="kicker">Suivi de livraison</p>
+            <h1 id="tracking-title">Recherche de votre livraison…</h1>
+          </div>
+        </div>
+
+        <div class="tracking-eta" id="tracking-eta" hidden>
+          <div class="eta-block">
+            <span class="eta-label">Arrivée estimée</span>
+            <strong id="eta-clock">--:--</strong>
+          </div>
+          <div class="eta-block">
+            <span class="eta-label">Dans environ</span>
+            <strong id="eta-remaining">-- min</strong>
+          </div>
+        </div>
+
+        <p class="tracking-note" id="tracking-note"></p>
+
+        <a class="secondary-action tracking-maps-link" id="maps-link" href="#" target="_blank" rel="noreferrer" hidden>
+          <i data-lucide="map-pin" aria-hidden="true"></i>
+          Ouvrir dans Google Maps
+        </a>
+      </section>
+
+      <div class="tracking-map" id="map" role="img" aria-label="Carte de suivi du livreur"></div>
+
+      <p class="tracking-footnote">
+        La position se met à jour automatiquement. Gardez cette page ouverte.
+      </p>
+    </main>
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/tracking.js"></script>
+    <script src="js/suivi.js"></script>
+  </body>
+</html>

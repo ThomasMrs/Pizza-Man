@@ -1192,3 +1192,284 @@ body {
     padding-bottom: 0;
   }
 }
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px clamp(16px, 4vw, 42px);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+  background: rgba(255, 248, 238, 0.6);
+}
+
+.footer-driver-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--green-dark);
+  font-weight: 800;
+  background: rgba(14, 91, 63, 0.08);
+}
+
+.footer-driver-link:hover,
+.footer-driver-link:focus-visible {
+  background: rgba(14, 91, 63, 0.16);
+  outline: none;
+}
+
+.footer-driver-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* =============================================================
+   Suivi de livraison : page livreur + page suivi client
+   ============================================================= */
+
+.delivery-page,
+.tracking-page {
+  display: grid;
+  gap: 18px;
+  width: min(680px, 100%);
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 32px) 48px;
+}
+
+.delivery-page .section-heading h1,
+.tracking-page h1 {
+  margin: 0;
+  color: var(--green-dark);
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
+  line-height: 1.08;
+}
+
+.delivery-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.delivery-hint {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: var(--green-dark);
+  background: rgba(14, 91, 63, 0.08);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.delivery-hint svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.form-note.is-error {
+  color: var(--red-dark);
+  font-weight: 700;
+}
+
+.delivery-live-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.delivery-live-head h2 {
+  margin: 0;
+  color: var(--green-dark);
+  font-size: 1.3rem;
+}
+
+.live-dot {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.live-dot.is-live,
+.delivery-live .live-dot {
+  background: var(--red);
+  box-shadow: 0 0 0 0 rgba(184, 50, 43, 0.55);
+  animation: live-pulse 1.8s ease-out infinite;
+}
+
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(184, 50, 43, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(184, 50, 43, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(184, 50, 43, 0);
+  }
+}
+
+.delivery-status-line {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(14, 91, 63, 0.06);
+  color: var(--green-dark);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.delivery-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.delivery-actions .primary-action {
+  grid-column: 1 / -1;
+}
+
+.delivery-preview-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green-dark);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.delivery-preview-link:hover {
+  text-decoration: underline;
+}
+
+.delivery-end-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.delivery-live.is-finished .delivery-actions,
+.delivery-live.is-finished .delivery-end-actions,
+.delivery-live.is-finished label,
+.delivery-live.is-finished .delivery-preview-link {
+  display: none;
+}
+
+/* --- Page de suivi client --- */
+
+.tracking-card {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.tracking-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.tracking-head .live-dot {
+  width: 14px;
+  height: 14px;
+}
+
+.tracking-eta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.eta-block {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(14, 91, 63, 0.07);
+}
+
+.eta-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.eta-block strong {
+  color: var(--green-dark);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.tracking-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.tracking-maps-link {
+  justify-self: start;
+}
+
+.tracking-map {
+  height: clamp(320px, 55vh, 620px);
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: #e9e4da;
+  z-index: 0;
+}
+
+.tracking-footnote {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* Marqueurs emoji sur la carte Leaflet */
+.map-emoji {
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 0;
+}
+
+.map-emoji span {
+  font-size: 30px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+
+.map-emoji.is-driver span {
+  font-size: 34px;
+}
+
+@media (max-width: 480px) {
+  .delivery-actions,
+  .delivery-end-actions,
+  .tracking-eta {
+    grid-template-columns: 1fr;
+  }
+}
